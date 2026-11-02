@@ -37,6 +37,13 @@ export default function Sync({ route, toast }: { route: Route; toast: (s: string
         <span>בלי חשבון ובלי סיסמה. מי שמחזיק בקוד רואה את הנתונים, לכן שומרים אותו כמו מפתח.</span>
       </p>
 
+      {route.params.c && !c && (
+        <div className="tone tone-solution" style={{ marginTop: 20 }}>
+          <span className="label">הוזמנת לכיתה</span>
+          <h4>כתבו את השם שלכם, ולחצו "צור קוד וסנכרן".</h4>
+          <p>זה הכול. ההתקדמות שלכם תישמר, והמרצה תראה באיזה שיעור אתם.</p>
+        </div>
+      )}
       <div className="card" style={{ marginTop: 24, display: "grid", gap: 14 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
           <span className="label">מצב</span>

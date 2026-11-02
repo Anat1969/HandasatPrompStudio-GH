@@ -11,9 +11,11 @@ import { PatternArticle } from "./Feature";
 type Link = { to: number; rule: string; insight: string; action: string };
 type Art = {
   id: string; kind: string; kicker: string; title: string; deck: string;
-  layout: "full" | "split" | "strip" | "collage" | "infographic" | "qa" | "timeline"; layoutName: string;
+  layout: "full" | "split" | "strip" | "collage" | "infographic" | "qa" | "timeline" | "storyboard" | "compare" | "letter"; layoutName: string;
   qa?: { q: string; a: string }[];
   timeline?: { year: string; title: string; text: string; lesson?: number }[];
+  compare?: { before: { title: string; lines: string[] }; after: { title: string; lines: string[] } };
+  letter?: { to: string; date: string; sign: string };
   Hero: () => ReactNode; caption: string;
   body: string[];
   quote: { tr: string; orig: string; origDir: "ltr" | "rtl"; cite: string };
@@ -223,6 +225,69 @@ function FogStand() {
       <text x="1070" y="40" textAnchor="end" fill="#E9EEF5" style={{ ...T, fontSize: 15, fontWeight: 700 }}>עיקרון: גבשושית אוספת טיפה, שקע מוביל אותה</text>
       <text x="1070" y="62" textAnchor="end" fill="#E9EEF5" style={{ ...T, fontSize: 13, opacity: .8 }}>מבנה: גג הצללה שאוסף טל מרוח הים (רעיון לתרגיל, לא פרויקט קיים)</text>
       <text x="40" y="300" fill="#16365F" style={{ ...T, fontSize: 13, fontWeight: 600 }}>חולות החוף</text>
+    </svg>
+  );
+}
+
+
+function Storyboard() {
+  // ארבעה פריימים: עולם (הגדרות), מקום (פרויקט), תקריב (צ'אט), וחיתוך: מה לא מראים (מגבלה)
+  const frames = [
+    { t: "פריים 1: עולם", s: "הגדרות: טון, אור, סגנון", c: "#16365F", d: <><rect x="20" y="96" width="260" height="34" fill="#E2C48A" /><circle cx="226" cy="44" r="16" fill="#FFE45C" /><path d="M20 96 L80 70 L130 86 L190 64 L280 92" fill="none" stroke="#E9EEF5" strokeWidth="2" /></> },
+    { t: "פריים 2: מקום", s: "פרויקט: איפה, מי, מתי", c: "#2E7D7A", d: <><rect x="40" y="56" width="70" height="74" fill="none" stroke="#E9EEF5" strokeWidth="2" /><rect x="124" y="36" width="56" height="94" fill="none" stroke="#E9EEF5" strokeWidth="2" /><rect x="194" y="70" width="70" height="60" fill="none" stroke="#E9EEF5" strokeWidth="2" /><line x1="20" y1="130" x2="280" y2="130" stroke="#E9EEF5" strokeWidth="2" /></> },
+    { t: "פריים 3: תקריב", s: "צ'אט: מה רואים עכשיו", c: "#B5652B", d: <><circle cx="150" cy="80" r="44" fill="none" stroke="#E9EEF5" strokeWidth="2" /><circle cx="150" cy="80" r="14" fill="#FFE45C" /></> },
+    { t: "חיתוך", s: "מגבלה: מה לא מראים", c: "#B8322A", d: <><line x1="40" y1="30" x2="260" y2="130" stroke="#E9EEF5" strokeWidth="3" /><line x1="260" y1="30" x2="40" y2="130" stroke="#E9EEF5" strokeWidth="3" /></> },
+  ];
+  return (
+    <div className="ft-board">
+      {frames.map((f, i) => (
+        <svg key={i} viewBox="0 0 300 200" role="img" aria-label={`${f.t}, ${f.s}`} style={{ direction: "ltr", display: "block", width: "100%", height: "auto" }}>
+          <rect width="300" height="160" fill={f.c} />
+          {f.d}
+          <rect width="300" height="160" fill="none" stroke="#15171C" strokeWidth="3" />
+          <text x="290" y="182" textAnchor="end" fill="#15171C" style={{ ...T, fontSize: 15, fontWeight: 700 }}>{f.t}</text>
+          <text x="290" y="198" textAnchor="end" fill="#4E525B" style={{ ...T, fontSize: 12 }}>{f.s}</text>
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+function ContractSheet() {
+  // מסמך עם סעיף "הגדרות": מילה אחת, משמעות אחת
+  return (
+    <svg viewBox="0 0 1100 260" role="img" aria-label="מסמך חוזה: סעיף הגדרות מסומן, ומילה עמומה מוקפת באדום" style={{ direction: "ltr", display: "block", width: "100%", height: "auto" }}>
+      <rect width="1100" height="260" fill="#F7F5EF" />
+      <rect x="560" y="20" width="500" height="220" fill="#FFFFFF" stroke="#15171C" strokeWidth="1.5" />
+      <text x="1040" y="56" textAnchor="end" fill="#15171C" style={{ ...T, fontSize: 18, fontWeight: 700 }}>סעיף 1: הגדרות</text>
+      {[0, 1, 2].map((k) => <g key={k}><rect x="1000" y={78 + k * 40} width="40" height="20" fill="#E6ECF4" /><line x1="600" y1={88 + k * 40} x2="990" y2={88 + k * 40} stroke="#9A9EA6" strokeWidth="6" /></g>)}
+      <text x="1040" y="230" textAnchor="end" fill="#1E7A55" style={{ ...T, fontSize: 13, fontWeight: 600 }}>"מבנה ציבור": כהגדרתו בתכנית החלה על המגרש</text>
+      <rect x="40" y="60" width="440" height="140" fill="#FFFFFF" stroke="#15171C" strokeWidth="1.5" />
+      <text x="460" y="96" textAnchor="end" fill="#15171C" style={{ ...T, fontSize: 17 }}>"תכין לי פרוגרמה</text>
+      <text x="460" y="126" textAnchor="end" fill="#15171C" style={{ ...T, fontSize: 17 }}>למבנה ציבור קטן"</text>
+      <line x1="250" y1="138" x2="460" y2="138" stroke="#B8322A" strokeWidth="2.5" strokeDasharray="7 4" />
+      <text x="460" y="180" textAnchor="end" fill="#B8322A" style={{ ...T, fontSize: 13 }}>שתי מילים, עשר פרשנויות</text>
+      <line x1="490" y1="130" x2="550" y2="130" stroke="#15171C" strokeWidth="1.5" />
+      <polygon points="550,130 540,124 540,136" fill="#15171C" />
+    </svg>
+  );
+}
+
+function RecipeCard() {
+  // כרטיס מתכון: מצרכים, שלבים, טעימה ותיקון
+  const rows = [["מצרכים", "הקשר: מגרש, קהל, תקן", "#2E7D7A"], ["שלבים", "סדר: קודם ניתוח, אחר כך הצעה", "#16365F"], ["טעימה", "סבב משוב: מה חסר", "#B5652B"], ["הגשה", "פורמט: טבלה, עמוד, שקף", "#A87B1F"]];
+  return (
+    <svg viewBox="0 0 520 300" role="img" aria-label="כרטיס מתכון: מצרכים, שלבים, טעימה והגשה" style={{ direction: "ltr", display: "block", width: "100%", height: "auto" }}>
+      <rect x="10" y="10" width="500" height="280" fill="#FFFDF6" stroke="#15171C" strokeWidth="1.5" />
+      <line x1="10" y1="62" x2="510" y2="62" stroke="#B8322A" strokeWidth="1.5" />
+      <text x="490" y="46" textAnchor="end" fill="#15171C" style={{ ...T, fontSize: 20, fontWeight: 700 }}>מתכון לפרומפט</text>
+      {rows.map(([h, t, c], i) => (
+        <g key={h}>
+          <rect x="460" y={80 + i * 50} width="30" height="30" fill={c} />
+          <text x="448" y={100 + i * 50} textAnchor="end" fill="#15171C" style={{ ...T, fontSize: 16, fontWeight: 700 }}>{h}</text>
+          <text x="360" y={100 + i * 50} textAnchor="end" fill="#4E525B" style={{ ...T, fontSize: 14 }}>{t}</text>
+        </g>
+      ))}
     </svg>
   );
 }
@@ -474,6 +539,131 @@ export const ARTICLES: Art[] = [
     ],
     inspiration: "ג'נין בניוס, 1997",
   },
+  {
+    id: "film", kind: "סטוריבורד", kicker: "סטוריבורד · קולנוע ותמונה", title: "תסריט הוא פרומפט לצוות.",
+    deck: "לפני שמצלמים, כותבים ומציירים: איזה עולם, איזה מקום, איזה תקריב, ו**מה לא מראים**. זה בדיוק סדר הפרומפט.",
+    layout: "storyboard", layoutName: "סטוריבורד: ארבעה פריימים", Hero: Storyboard,
+    caption: "ארבעה פריימים, ארבע הוראות: עולם (הגדרות), מקום (פרויקט), תקריב (צ'אט), וחיתוך (מגבלה). איור בקוד.",
+    body: [
+      "תסריט לא מצלם. הוא נותן לעשרות אנשים, צלם, מעצב תפאורה, שחקנית, את **אותה תמונה בראש**. מי שכותב אותו יודע שכל מילה עמומה תהפוך לויכוח על הסט.",
+      "סטוריבורד עושה את זה בציור: פריים רחב שקובע את העולם, פריים של המקום, תקריב על מה שחשוב עכשיו, וחיתוך: מה נשאר מחוץ לפריים. ==ארבע החלטות, באותו סדר של שלוש שכבות ומגבלה.==",
+      "בפרומפט לתמונה זה חשוב עוד יותר. מחולל תמונות לא שואל שאלות הבהרה. מה שלא נכתב, ממולא מהממוצע של העולם.",
+    ],
+    quote: {
+      tr: "\"עם תסריט טוב, במאי טוב יכול ליצור יצירת מופת. עם אותו תסריט, במאי בינוני יכול לעשות סרט סביר. אבל עם תסריט רע, אפילו במאי טוב לא יכול לעשות סרט טוב.\"",
+      orig: "\"With a good script, a good director can produce a masterpiece; with the same script, a mediocre director can make a passable film. But with a bad script even a good director can't possibly make a good film.\"",
+      origDir: "ltr", cite: "אקירה קורוסאווה, Something Like an Autobiography, 1982",
+    },
+    after: [
+      "**דוגמה מהעיר:** הדמיה של טיילת החוף ב**אשדוד** ~~Ashdod~~. \"טיילת יפה בשקיעה\" מחזירה גלויה גנרית. סטוריבורד בפרומפט: **עולם**: ריאליזם תיעודי, צילום אדריכלות. **מקום**: טיילת חוף ים־תיכונית, ספסלי בטון, צמחיית חולות. **תקריב**: משפחה על הספסל, צל של פרגולה. **חיתוך**: בלי טקסט, בלי שלטים, בלי לוגו.",
+      "**הכלל המעשי:** לפני כל פרומפט לתמונה, כתבו ארבע שורות: עולם, מקום, תקריב, חיתוך. אם אחת חסרה, המחולל ימלא אותה בשבילכם.",
+    ],
+    insight: "מה שלא נכתב, המחולל ממלא מהממוצע.",
+    haiku: ["פריים אחרי פריים", "צל של פרגולה על ספסל", "מחוץ לתמונה, ים"],
+    haikuNote: "מה ההייקו מאיר: גם מה שנשאר מחוץ לפריים הוא החלטה.",
+    links: [
+      { to: 13, rule: "מילה אחרת יוצרת מרחב אחר.", insight: "\"שקיעה\" ו\"אור אחר הצהריים\" הן שתי תמונות שונות.", action: "החליפו בפרומפט שלכם מילה כללית אחת במילה מדויקת." },
+      { to: 16, rule: "ה-DNA שלך כבר בפרויקטים שלך.", insight: "שורת ה\"עולם\" היא ה-DNA החזותי שלכם.", action: "כתבו שורת עולם קבועה, והדביקו אותה בהגדרות." },
+      { to: 6, rule: "קודם המגבלה הטכנית, אחריה ההשראה.", insight: "החיתוך הוא מגבלה: מה לא נכנס לתמונה.", action: "הוסיפו לכל פרומפט תמונה שורת \"בלי\"." },
+    ],
+    post: `תסריט הוא פרומפט לעשרות אנשים. כל מילה עמומה בו הופכת לוויכוח על הסט.
+סטוריבורד פותר את זה בארבעה פריימים: עולם, מקום, תקריב, ומה נשאר מחוץ לתמונה.
+בפרומפט לתמונה זה חשוב עוד יותר, כי המחולל לא שואל. מה שלא כתבתם, הוא ממלא מהממוצע.
+לפני הפרומפט הבא שלכם, כתבו ארבע שורות: עולם, מקום, תקריב, חיתוך.
+איזו שורה אתם נוטים לשכוח?`,
+    sources: [
+      "Akira Kurosawa, Something Like an Autobiography, Alfred A. Knopf, 1982.",
+      "שיעורים 06, 13 ו-16 בקורס הזה.",
+    ],
+    inspiration: "אקירה קורוסאווה, 1982",
+  },
+  {
+    id: "contract", kind: "השוואה", kicker: "לפני ואחרי · משפט ושפה", title: "מילה אחת, משמעות אחת.",
+    deck: "חוזה טוב מתחיל בסעיף **הגדרות**. פרומפט טוב צריך את אותו סעיף: מה בדיוק אומרת המילה שבחרתם.",
+    layout: "compare", layoutName: "השוואה: לפני ואחרי בשני טורים", Hero: ContractSheet,
+    caption: "משמאל בקשה עמומה, מימין סעיף הגדרות. אותה מילה, בלי מקום לפרשנות. איור בקוד.",
+    body: [
+      "עורכי דין יודעים מה שאדריכלים לומדים בדרך הקשה: **המילה \"קטן\" היא לא מידה**. לכן כל חוזה נפתח בסעיף הגדרות, ולכן כל תב\"ע מגדירה מהו \"שטח עיקרי\" ומהו \"שטח שירות\".",
+      "מודל שפה קורא את הבקשה שלכם כמו צד שני לחוזה, בתום לב ובלי הקשר. כל מילה עמומה מקבלת את הפירוש השכיח ביותר, לא את זה שהתכוונתם אליו.",
+    ],
+    compare: {
+      before: { title: "בקשה", lines: ["\"תכין לי פרוגרמה למבנה ציבור קטן.\""] },
+      after: { title: "בקשה עם סעיף הגדרות", lines: [
+        "**מבנה ציבור:** מרכז קהילתי שכונתי, כהגדרתו בתכנית החלה על המגרש.",
+        "**קטן:** עד **600** מ\"ר שטח עיקרי, בשתי קומות לכל היותר.",
+        "**פרוגרמה:** טבלת חללים: שם, שטח, קשרים, שעות פעילות.",
+        "**מחוץ להיקף:** חניה ופיתוח שטח.",
+        "**תנאי קבלה:** כל חלל עם נימוק ומקור. מה שהוא הנחה, מסומן.",
+      ] },
+    },
+    quote: {
+      tr: "\"מילה אינה גביש, שקופה ובלתי משתנה. היא עור של מחשבה חיה, ויכולה להשתנות מאוד בצבע ובתוכן לפי הנסיבות והזמן שבהם משתמשים בה.\"",
+      orig: "\"A word is not a crystal, transparent and unchanged; it is the skin of a living thought and may vary greatly in color and content according to the circumstances and the time in which it is used.\"",
+      origDir: "ltr", cite: "השופט אוליבר וונדל הולמס, Towne v. Eisner, 245 U.S. 418, 1918",
+    },
+    after: [
+      "**דוגמה מהעיר:** מכרז לתכנון מבנה ציבור ב**אשדוד** ~~Ashdod~~ מגדיר כל מונח לפני שהוא משתמש בו. אותו סדר בפרומפט חוסך סבב שלם של \"לא לזה התכוונתי\".",
+      "**הכלל המעשי:** לפני שאתם שולחים, סמנו בפרומפט כל שם תואר: קטן, מודרני, ירוק, נגיש. לכל אחד, כתבו שורת הגדרה אחת עם מספר או מקור.",
+    ],
+    insight: "שם תואר בלי הגדרה הוא הזמנה לנחש.",
+    haiku: ["סעיף ראשון בדף", "מילה אחת נעצרת", "ומקבלת גבול"],
+    haikuNote: "מה ההייקו מאיר: הגדרה היא קו על המפה של מילה.",
+    links: [
+      { to: 17, rule: "הגדרה עבודתית עדיפה על קונצנזוס.", insight: "סעיף הגדרות הוא הגדרה עבודתית, לפרויקט אחד.", action: "כתבו שלוש הגדרות לפרויקט הנוכחי, והעבירו אותן לשכבת הפרויקט." },
+      { to: 13, rule: "מילה אחרת יוצרת מרחב אחר.", insight: "\"סף\" ו\"כניסה\" הן שתי הוראות תכנון.", action: "בדקו איזו מילה בפרומפט שלכם יש לה שתי משמעויות." },
+      { to: 21, rule: "AI טועה בביטחון. אימות עוצר.", insight: "\"תנאי קבלה\" בחוזה הם רשימת האימות של הפרומפט.", action: "סיימו כל פרומפט בשורת תנאי קבלה." },
+    ],
+    post: `כל חוזה נפתח בסעיף הגדרות. לא מתוך פדנטיות, אלא כי מילה כמו "קטן" היא לא מידה.
+מודל שפה קורא את הבקשה שלכם כמו צד שני לחוזה: בלי הקשר, ונותן לכל מילה עמומה את הפירוש השכיח.
+"פרוגרמה למבנה ציבור קטן" היא עשר בקשות שונות. "מרכז קהילתי, עד 600 מ"ר, טבלת חללים, בלי חניה" היא בקשה אחת.
+לפני שאתם שולחים, סמנו כל שם תואר, ותנו לו שורת הגדרה.
+איזו מילה בפרומפטים שלכם הכי צריכה הגדרה?`,
+    sources: [
+      "Towne v. Eisner, 245 U.S. 418 (1918), חוות דעת השופט Oliver Wendell Holmes Jr.",
+      "שיעורים 13, 17 ו-21 בקורס הזה.",
+    ],
+    inspiration: "השופט הולמס, 1918",
+  },
+  {
+    id: "recipe", kind: "מכתב", kicker: "מכתב · מטבח ושיטה", title: "מתכון, לא בקשה.",
+    deck: "מכתב לתלמידי הקורס על מה שמטבח טוב יודע: **מצרכים**, **שלבים**, **טעימה** ו**הגשה**.",
+    layout: "letter", layoutName: "מכתב אישי לתלמידים", Hero: RecipeCard,
+    caption: "כרטיס מתכון כפרומפט: מצרכים (הקשר), שלבים (סדר), טעימה (משוב), הגשה (פורמט). איור בקוד.",
+    letter: { to: "לתלמידי הקורס, שלום רב,", date: "נובמבר 2026", sign: "בהצלחה, ענת" },
+    body: [
+      "בשיעור הראשון השוויתי פרומפט למסעדה: מטבח, תפריט והזמנה. היום אני רוצה להיכנס למטבח עצמו, כי שם מסתתר הסוד: **מתכון טוב לא מבקש \"משהו טעים\"**.",
+      "מתכון מתחיל ב**מצרכים**: כמויות, לא כוונות. אצלנו אלה ההקשר: מגרש, קהל, תקן. אחר כך **שלבים**, בסדר שאי אפשר להחליף: קודם מטגנים בצל, אחר כך מוסיפים עגבניות. אצלנו: קודם ניתוח, אחר כך הצעה.",
+      "ואז מגיע הרגע שכל טבח מכיר: **טועמים ומתקנים**. אף מתכון לא יוצא מושלם בפעם הראשונה. זה סבב המשוב של שיעור **03**: לא מקבלים את התשובה הראשונה, אלא מוסיפים מלח.",
+      "ובסוף **הגשה**: אותה מנה בצלחת או בקופסה היא חוויה אחרת. אצלנו: טבלה, עמוד אחד, שלושה שקפים.",
+      "דוגמה: אם אתם מתכננים מטבח לבית ספר ב**אשדוד** ~~Ashdod~~, אל תבקשו \"מטבח טוב\". כתבו את המצרכים (מספר ארוחות, גילאים, תקנים), את השלבים (זרימה מקבלה עד הגשה), ותטעמו: מה חסר בתשובה הראשונה?",
+    ],
+    quote: {
+      tr: "\"אמור לי מה אתה אוכל, ואומר לך מה אתה.\"",
+      orig: "\"Dis-moi ce que tu manges, je te dirai ce que tu es.\"",
+      origDir: "ltr", cite: "ז'אן אנתלם בריה־סווארן, Physiologie du goût, 1825",
+    },
+    after: [
+      "בריה־סווארן כתב את זה על אוכל. אני קוראת את זה על פרומפטים: ==אמרו לי מה נתתם למודל, ואומר לכם מה תקבלו.==",
+    ],
+    insight: "אמרו לי מה נתתם, ואומר לכם מה תקבלו.",
+    haiku: ["אדים מהסיר", "כף עץ טועמת לאט", "עוד קורט של מלח"],
+    haikuNote: "מה ההייקו מאיר: התשובה הראשונה היא טעימה, לא מנה.",
+    links: [
+      { to: 1, rule: "הקשר קבוע שייך להגדרות.", insight: "המטבח של שיעור 01 הוא ההגדרות: מה שנכון לכל מנה.", action: "בדקו שההגדרות שלכם כתובות פעם אחת, ולא בכל שאלה." },
+      { to: 3, rule: "שותף מחקר נבנה בסבבי משוב.", insight: "טעימה היא סבב משוב.", action: "אחרי כל תשובה ראשונה, כתבו משפט אחד: מה חסר בה." },
+      { to: 11, rule: "מבנה קבוע, פרמטרים משתנים.", insight: "המתכון קבוע. הכמויות משתנות לפי מספר הסועדים.", action: "סמנו במתכון שלכם את הכמויות, אלה הפרמטרים." },
+    ],
+    post: `מתכון טוב לא מבקש "משהו טעים". הוא כותב מצרכים, שלבים, טעימה והגשה.
+כך גם פרומפט טוב: הקשר במקום כוונה, סדר במקום ערבוב, סבב משוב במקום התשובה הראשונה, ופורמט במקום "תכתוב משהו".
+בריה־סווארן כתב ב-1825: "אמור לי מה אתה אוכל, ואומר לך מה אתה".
+אני אומרת: אמרו לי מה נתתם למודל, ואומר לכם מה תקבלו.
+מה המצרך שאתם הכי שוכחים לתת?`,
+    sources: [
+      "Jean Anthelme Brillat-Savarin, Physiologie du goût, 1825.",
+      "שיעורים 01, 03 ו-11 בקורס הזה.",
+    ],
+    inspiration: "בריה־סווארן, 1825",
+  },
 ];
 
 export const ALL = [
@@ -508,12 +698,16 @@ function ArticleView({ a }: { a: Art }) {
       {a.layout === "infographic" && (<><Head a={a} /><figure className="ft-info" style={{ margin: 0 }}><a.Hero /></figure></>)}
       {a.layout === "qa" && (<><Head a={a} /><figure className="ft-strip" style={{ margin: 0 }}><a.Hero /></figure></>)}
       {a.layout === "timeline" && (<><Head a={a} /><figure className="ft-info" style={{ margin: 0 }}><a.Hero /></figure></>)}
+      {a.layout === "storyboard" && (<><Head a={a} /><figure style={{ margin: 0 }}><a.Hero /></figure></>)}
+      {a.layout === "compare" && (<><Head a={a} /><figure className="ft-strip" style={{ margin: 0 }}><a.Hero /></figure></>)}
+      {a.layout === "letter" && (<><Head a={a} /><figure className="ft-letter-fig" style={{ margin: 0 }}><a.Hero /></figure></>)}
       <figcaption className="ft-caption">{a.caption}</figcaption>
 
       {a.layout === "infographic" && (
         <div className="ft-two">{a.body.map((p, i) => <Rich key={i} as="p" className={i === 0 ? "ft-p ft-drop" : "ft-p"}>{p}</Rich>)}</div>
       )}
-      <div className="ft-col">
+      <div className={`ft-col${a.letter ? " ft-letter" : ""}`}>
+        {a.letter && <p className="ft-letter-head"><span>{a.letter.date}</span><b>{a.letter.to}</b></p>}
         {a.layout !== "infographic" && a.body.map((p, i) => <Rich key={i} as="p" className={i === 0 ? "ft-p ft-drop" : "ft-p"}>{p}</Rich>)}
         {a.qa && (
           <section className="ft-qa" aria-label="שאלות ותשובות">
@@ -525,6 +719,18 @@ function ArticleView({ a }: { a: Art }) {
             ))}
           </section>
         )}
+        {a.compare && (
+          <div className="ft-compare" aria-label="לפני ואחרי">
+            {[["before", a.compare.before], ["after", a.compare.after]].map(([k, c]: any) => (
+              <div key={k} className={`ft-cmp ft-cmp-${k}`}>
+                <span className="label">{k === "before" ? "לפני" : "אחרי"}</span>
+                <h3>{c.title}</h3>
+                <ol>{c.lines.map((x: string, i: number) => <Rich key={i} as="li">{x}</Rich>)}</ol>
+              </div>
+            ))}
+          </div>
+        )}
+        {a.letter && <p className="ft-sign">{a.letter.sign}</p>}
         {a.timeline && (
           <ol className="ft-timeline" aria-label="ציר זמן">
             {a.timeline.map((t, i) => (
@@ -590,7 +796,7 @@ function Index() {
     <main className="page">
       <div className="crumbs"><a href={href("home")}>הבית</a><span>/</span><span>כתבות</span></div>
       <div className="kicker">ריכוזי ידע</div>
-      <h1 className="page-title">שבע כתבות, שבע דרכים לקרוא פרומפט.</h1>
+      <h1 className="page-title">עשר כתבות, עשר דרכים לקרוא פרומפט.</h1>
       <p className="page-sub lines">
         <span>כל כתבה מחברת הוגה אחד מהאדריכלות והעיר לשיעורים בקורס.</span>
         <span>בכל אחת: ציטוט מהמקור, <strong>תובנה</strong>, הייקו, חיבורים ופוסט מוכן. כל אחת בפריסה אחרת.</span>

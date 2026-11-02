@@ -480,3 +480,22 @@ mark.added { background: rgba(255, 228, 92, .28); color: #FFF3B0; padding: 0 2px
 .ft-year { font-size: 22px; color: var(--cyan); text-align: center; align-self: start; position: relative; z-index: 1; background: var(--paper); padding: 6px 0; border-bottom: 3px solid var(--stamp); }
 .ft-timeline b { font-size: 19px; display: block; margin-bottom: 4px; }
 .ft-timeline p { font-size: 16.5px; line-height: 1.8; margin: 0 0 4px; }
+/* הודעת הצטרפות לכיתה */
+.invite { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 24px; margin-top: 20px; border-top: 3px solid var(--permit); }
+.invite-text { white-space: pre-line; background: var(--permit-wash); padding: 14px 16px; font-size: 15px; line-height: 1.8; margin-top: 8px; border-inline-start: 3px solid var(--permit); }
+.invite-acts { display: grid; gap: 8px; align-content: start; }
+@media (max-width: 900px) { .invite { grid-template-columns: minmax(0, 1fr); } }
+/* כתבות: סטוריבורד, השוואה, מכתב */
+.ft-board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.ft-compare { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 16px; margin: 28px 0; }
+.ft-cmp { padding: 16px 18px; border-top: 4px solid; background: var(--sheet); box-shadow: var(--shadow-1); }
+.ft-cmp h3 { font-size: 18px; margin: 4px 0 8px; }
+.ft-cmp ol { margin: 0; padding-inline-start: 20px; display: grid; gap: 6px; font-size: 16px; line-height: 1.7; }
+.ft-cmp-before { border-color: var(--redline); background: var(--redline-wash); }
+.ft-cmp-after { border-color: var(--permit); background: var(--permit-wash); }
+.ft-letter-fig { max-width: 520px; margin: 0 auto !important; }
+.ft-letter { background: #FFFDF6; padding: 36px 40px; box-shadow: var(--shadow-2); border: 1px solid var(--rule); }
+.ft-letter-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-bottom: 1px solid var(--rule); padding-bottom: 12px; }
+.ft-letter-head span { font-family: var(--mono); font-size: 13px; color: var(--ink-mute); }
+.ft-sign { font-weight: 700; font-size: 20px; text-align: end; margin-top: 8px; }
+@media (max-width: 900px) { .ft-board { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ft-compare { grid-template-columns: minmax(0, 1fr); } .ft-letter { padding: 22px 18px; } }

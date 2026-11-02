@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { IconCopy } from "../components/Icons";
 import { ORDER, TRACKS, TRACK_HEX, TOTAL_STEPS } from "../data/course";
 import { fetchCohort, newCohort, type CohortRow } from "../lib/sync";
+import { addCohort, cohorts, inviteText, joinLink, renameCohort, whatsapp } from "../lib/classes";
 import { href, setParams, type Route } from "../lib/route";
+import { useStored } from "../lib/store";
 import { copyText } from "./Lesson";
 
 // מבט כיתה למרצה: מפת חום של משתתפים מול שיעורים. המספרים מחושבים מסימוני השלבים בלבד.
@@ -43,31 +45,52 @@ export default function Class({ route, toast }: { route: Route; toast: (s: strin
     const quiet = rows.filter((r) => Date.now() - new Date(r.updated_at).getTime() > 7 * 864e5).length;
     return { avg, per, stuck, best, started: started.length, quiet };
   }, [rows]);
-  const link = `${location.origin}${location.pathname}#/sync?c=${code}`;
+  useStored<unknown[]>("teacher:cohorts", []); // רענון כששם או רשימה משתנים
+  const list = cohorts();
+  const cur = list.find((x) => x.code === code);
+  const [newName, setNewName] = useState("");
+  useEffect(() => { if (!route.params.c && list[0]) setParams(route, { c: list[0].code }); }, [route.params.c]); // eslint-disable-line
 
   return (
     <main className="page">
-      <div className="crumbs"><a href={href("home")}>הבית</a><span>/</span><span>מבט כיתה</span></div>
-      <div className="kicker">למרצה</div>
-      <h1 className="page-title">הכיתה במבט אחד.</h1>
-      <p className="page-sub lines">
-        <span>כל שורה היא משתתף, כל עמודה היא שיעור. הצבע אומר כמה שלבים בוצעו.</span>
-        <span>מוצגים רק <strong>שם</strong>, <strong>סימוני שלבים</strong> ו<strong>מספר עבודות</strong>. רפלקציות, טיוטות ותמונות לא נחשפים.</span>
-      </p>
+      <div className="crumbs"><a href={href("home")}>הבית</a><span>/</span><span>התקדמות התלמידים</span></div>
+      <div className="kicker">למרצה בלבד</div>
+      <h1 className="page-title">מי התקדם, ואיפה נתקעים.</h1>
+      <div className="tones" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+        <div className="tone tone-neutral"><span className="label">מה הדף הזה</span><p className="lines"><span>לוח של <strong>כל התלמידים בכיתה</strong>, ומה כל אחד סימן כבוצע.</span><span>שורה לכל תלמיד, עמודה לכל שיעור.</span></p></div>
+        <div className="tone tone-neutral"><span className="label">איך הוא מתמלא</span><p className="lines"><span>שולחים לתלמידים <strong>הודעת הצטרפות</strong> בוואטסאפ או בזום.</span><span>כל מי שנכנס דרך הקישור ולחץ "צור קוד וסנכרן" מופיע כאן מיד.</span></p></div>
+        <div className="tone tone-insight"><span className="label">מה רואים</span><p className="lines"><span>רק <strong>שם</strong>, סימוני שלבים ומספר עבודות.</span><span>רפלקציות, טיוטות ותמונות נשארות פרטיות.</span></p></div>
+      </div>
 
       <div className="toolbar">
-        <form className="chips" onSubmit={(e) => { e.preventDefault(); setParams(route, { c: typed.trim().toLowerCase() }); }} style={{ gap: 8 }}>
-          <input className="field" dir="ltr" style={{ width: 240 }} aria-label="קוד כיתה" placeholder="kita-xxxxx-xxxxx" value={typed} onChange={(e) => setTyped(e.target.value)} />
-          <button className="press btn" type="submit" disabled={typed.trim().length < 8}>הצג כיתה</button>
-          <button className="press btn-quiet" type="button" onClick={() => { const c = newCohort(); setTyped(c); setParams(route, { c }); }}>צור קוד כיתה חדש</button>
+        <div className="chips" role="group" aria-label="הכיתות שלי">
+          <span className="chip-hint" style={{ marginInlineStart: 0 }}>הכיתות שלי:</span>
+          {list.map((c) => <button key={c.code} className="chip-t" aria-pressed={c.code === code} onClick={() => { setTyped(c.code); setParams(route, { c: c.code }); }}>{c.name}</button>)}
+        </div>
+        <form className="chips" style={{ gap: 8 }} onSubmit={(e) => { e.preventDefault(); const c = newCohort(); addCohort(c, newName); setNewName(""); setTyped(c); setParams(route, { c }); toast("נפתחה כיתה חדשה. ההודעה שלה זמינה גם בכפתור הלוגו."); }}>
+          <input className="field" style={{ width: 200 }} aria-label="שם לכיתה חדשה" placeholder="שם לכיתה חדשה" value={newName} onChange={(e) => setNewName(e.target.value)} />
+          <button className="press btn-quiet" type="submit" disabled={!newName.trim()}>פתח כיתה חדשה</button>
+          <button className="press btn-quiet" type="button" disabled={busy} onClick={load}>{busy ? "טוען..." : "רענן"}</button>
         </form>
-        {code.length >= 8 && (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button className="press btn-quiet" onClick={() => copyText(link, toast)}><IconCopy width={14} height={14} />העתק קישור הצטרפות</button>
-            <button className="press btn-quiet" disabled={busy} onClick={load}>{busy ? "טוען..." : "רענן"}</button>
-          </div>
-        )}
       </div>
+
+      {cur && (
+        <section className="invite card" aria-label="הודעת הצטרפות">
+          <div>
+            <span className="label">הודעת הצטרפות: {cur.name}</span>
+            <p className="mode-note">מעתיקים ומדביקים בקבוצת הוואטסאפ או בצ'אט של זום. אותה הודעה זמינה תמיד גם בכפתור הלוגו.</p>
+            <div className="invite-text">{inviteText(cur)}</div>
+          </div>
+          <div className="invite-acts">
+            <button className="press btn btn-main" onClick={() => copyText(inviteText(cur), toast)}><IconCopy width={16} height={16} />העתק הודעה</button>
+            <a className="press btn" href={whatsapp(cur)} target="_blank" rel="noreferrer">שלח בוואטסאפ</a>
+            <button className="press btn-quiet" onClick={() => copyText(joinLink(cur.code), toast)}>העתק רק את הקישור</button>
+            <label className="label" htmlFor="cname">שם הכיתה</label>
+            <input id="cname" className="field" value={cur.name} onChange={(e) => renameCohort(cur.code, e.target.value)} />
+            <span className="src" dir="ltr">{cur.code}</span>
+          </div>
+        </section>
+      )}
 
       {code.length < 8 && (
         <div className="tones" style={{ marginTop: 20 }}>
