@@ -17,6 +17,11 @@ const AIMENU = fs.readFileSync(path.join(__dirname, '../public/ai-menu.js'));
     await p.route('**/appofapp-gh.vercel.app/ai-menu.js', (r) => r.fulfill({ status: 200, contentType: 'application/javascript', body: AIMENU }));
     const errors = [];
     p.on('pageerror', (e) => errors.push(e.message));
+    // מוקים לשרת: סנכרון ו"הגרסה המלאה"
+    const pushed = [];
+    await ctx.route('**/rest/v1/rpc/hps_push', (r) => { pushed.push(JSON.parse(r.request().postData())); r.fulfill({ status: 200, contentType: 'application/json', body: '{"updated_at":"2026-11-02T00:00:00Z"}' }); });
+    await ctx.route('**/rest/v1/rpc/hps_pull', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(JSON.parse(r.request().postData()).p_key === 'aaaaa-bbbbb-ccccc' ? { name: 'רון', state: { 'progress': { v: { '13': [true, true, true] }, t: 9999999999999 } }, works: [], updated_at: 'x' } : null) }));
+    await ctx.route('**/functions/v1/hps-improve', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ provider: 'gemini', settings: 'ענה בעברית, בטון מקצועי.', project: 'אתה יועץ תכנון למבני חינוך.\nפרויקט: כיתה בבית ספר באשדוד.', chat: 'הצע תכנון לכיתה.', notes: [{ layer: 'project', change: 'נוסף תפקיד', why: 'המודל יודע מי הוא.' }] }) }));
     await p.goto(BASE, { waitUntil: 'networkidle' });
 
     ok((await p.locator('h1').innerText()).includes('שיעורים'), 'דף הבית: שורת התובנה');
@@ -56,12 +61,23 @@ const AIMENU = fs.readFileSync(path.join(__dirname, '../public/ai-menu.js'));
     const low = Number(await p.locator('.gauge text').textContent());
     await p.getByRole('button', { name: 'שלוש שכבות: כיתה' }).click();
     const high = Number(await p.locator('.gauge text').textContent());
-    ok(low < 50 && high >= 80, `מדד: צ'אט בלבד ${low}, שלוש שכבות ${high}`);
+    ok(low < 50 && high === 100, `מדד: צ'אט בלבד ${low}, שלוש שכבות ${high}`);
+    ok(await p.locator('section.checks').count() === 3, 'המדד מפורק לשלוש שכבות');
+    await p.getByRole('button', { name: "הכול בצ'אט, בלי סדר" }).click();
+    ok(await p.locator('.check small.move').count() >= 3, 'רכיב בשכבה הלא נכונה מקבל הוראה להעביר');
+    await p.getByRole('button', { name: 'הראה איך זה צריך להיראות' }).click();
+    await p.waitForSelector('#ideal');
+    ok((await p.locator('#ideal .section-lead').innerText()).includes('100'), 'הגרסה המלאה מקבלת 100');
+    ok(await p.locator('#ideal mark.added').count() > 3, 'השורות שנוספו מסומנות');
+    ok(await p.locator('#ideal .note').count() >= 2, 'הסבר לכל תוספת');
+    await p.getByRole('button', { name: 'החל את הגרסה המלאה' }).click();
+    ok(Number(await p.locator('.gauge text').textContent()) === 100, 'אחרי החלה: הציון 100');
+    await p.getByRole('button', { name: 'שלוש שכבות: כיתה' }).click();
     await p.getByRole('button', { name: 'שמור בספרייה' }).click();
     ok(await p.locator('.lib-row').count() === 1, 'שמירה בספרייה');
 
     // ניווט בסרגל ושם האפליקציה לבית
-    for (const [label, hash] of [['שיעורים', '#/lessons'], ['תיק עבודות', '#/portfolio'], ['כתבה', '#/feature']]) {
+    for (const [label, hash] of [['שיעורים', '#/lessons'], ['תיק עבודות', '#/portfolio'], ['כתבות', '#/feature']]) {
       await p.locator('.tabs').getByRole('link', { name: label }).click();
       await p.waitForFunction((l) => document.querySelector('.tabs [aria-current="page"]')?.textContent === l, label, { timeout: 4000 }).catch(() => {});
       ok(await p.locator('.tabs [aria-current="page"]').innerText() === label, `לשונית ${label}`);
@@ -92,6 +108,39 @@ const AIMENU = fs.readFileSync(path.join(__dirname, '../public/ai-menu.js'));
     ok(await p.getByText('לא נמצאה התאמה').isVisible(), 'חיפוש: מצב ריק מוסבר');
     await search.press('Escape');
     ok(await search.inputValue() === '', 'Esc מאפס חיפוש');
+
+    // כתבות
+    await p.goto(BASE + '#/feature', { waitUntil: 'networkidle' });
+    ok(await p.locator('.article-card').count() === 4, 'ארבע כתבות באינדקס');
+    for (const id of ['patterns', 'jacobs', 'machine', 'vitruvius']) {
+      await p.goto(BASE + '#/feature/' + id, { waitUntil: 'networkidle' });
+      const okA = await p.locator('.ft-quote').count() === 1 && await p.locator('.ft-haiku').count() === 1 && await p.locator('.ft-link').count() >= 4;
+      ok(okA, `כתבה ${id}: ציטוט, הייקו, חיבורים`);
+    }
+
+    // מצגת לכל שיעור
+    for (const n of [7, 19, 30]) {
+      await p.goto(BASE + '#/lesson/' + n, { waitUntil: 'networkidle' });
+      await p.getByRole('button', { name: 'צפה במצגת השיעור' }).click();
+      const top = await p.locator('.deck-top').innerText();
+      ok(/1\/1[01]/.test(top), `מצגת שיעור ${n}: ${top.replace(/\s+/g, ' ')}`);
+      await p.keyboard.press('Escape');
+    }
+
+    // סנכרון: קוד חדש דוחף, קוד קיים מושך וממזג
+    await p.goto(BASE + '#/sync', { waitUntil: 'networkidle' });
+    await p.getByLabel('השם שלך').fill('נועה');
+    await p.getByRole('button', { name: 'צור קוד וסנכרן' }).click();
+    await p.waitForFunction(() => document.querySelector('main')?.innerText.includes('קוד הסנכרון שלך'));
+    await p.waitForTimeout(400);
+    ok(pushed.length >= 1 && pushed.at(-1).p_name === 'נועה' && pushed.at(-1).p_state.progress, 'סנכרון: נדחף לשרת עם ההתקדמות');
+    ok(/^[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}$/.test(pushed.at(-1).p_key), 'סנכרון: קוד בפורמט קבוע');
+    await p.getByRole('button', { name: 'נתק את המכשיר הזה' }).click();
+    await p.getByLabel('קוד סנכרון קיים').fill('aaaaa-bbbbb-ccccc');
+    await p.getByRole('button', { name: 'חבר ומזג' }).click();
+    await p.waitForTimeout(600);
+    const prog = await p.evaluate(() => JSON.parse(localStorage.getItem('hps:progress') || '{}'));
+    ok(prog['13'] && prog['13'][0] === true && prog['7'], 'סנכרון: מיזוג משרת שומר גם את המקומי');
 
     // מצגת שיעור 01
     await p.goto(BASE + '#/lesson/1', { waitUntil: 'networkidle' });
@@ -129,7 +178,7 @@ const AIMENU = fs.readFileSync(path.join(__dirname, '../public/ai-menu.js'));
 
     for (const vp of [{ width: 390, height: 844 }, { width: 1280, height: 900 }]) {
       await p.setViewportSize(vp);
-      for (const h of ['', '#/lessons', '#/lesson/19', '#/studio', '#/portfolio', '#/feature']) {
+      for (const h of ['', '#/lessons', '#/lesson/19', '#/studio', '#/portfolio', '#/feature', '#/feature/vitruvius', '#/feature/jacobs', '#/sync']) {
         await p.goto(BASE + h, { waitUntil: 'networkidle' });
         const over = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         ok(over <= 0, `בלי גלילה אופקית ${vp.width} ${h || 'בית'} (${over})`);

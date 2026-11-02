@@ -81,7 +81,7 @@ export default function Home() {
         <div className="tone tone-insight rise" style={{ ["--i" as any]: 3 }}>
           <span className="label">התובנה</span>
           <h4>הפרומפט הוא שרטוט, לא שאלה.</h4>
-          <p className="lines"><span><Rich>{"==כמו תוכנית עבודה, הוא נבנה בשכבות, נבדק ונחתם.=="}</Rich></span><span>את זה בונים בסטודיו, ומודדים ב<strong>8</strong> פרמטרים.</span></p>
+          <p className="lines"><span><Rich>{"==כמו תוכנית עבודה, הוא נבנה בשכבות, נבדק ונחתם.=="}</Rich></span><span>את זה בונים בסטודיו, ומודדים ב<strong>11</strong> רכיבים, לפי שכבה.</span></p>
         </div>
       </div>
 
@@ -110,23 +110,23 @@ export default function Home() {
         <a className="press tone tone-neutral" href={href("studio")} style={{ textDecoration: "none", color: "inherit" }}>
           <span className="label">סטודיו פרומפטים</span>
           <h4>בונים פרומפט בשלוש שכבות ומודדים אותו.</h4>
-          <p className="lines"><span>מדד של <strong>8</strong> פרמטרים, שמסביר כל ציון.</span><span>נשען על מודל השכבות ועל מדריך ההנדסה של <strong>Anthropic</strong>.</span></p>
+          <p className="lines"><span>מדד של <strong>11</strong> רכיבים, מפורק להגדרות, פרויקט וצ'אט.</span><span>ו<strong>הגרסה המלאה</strong>: איך הפרומפט שלך נראה ב-<strong>100</strong>.</span></p>
         </a>
         <a className="press tone tone-neutral" href={href("portfolio")} style={{ textDecoration: "none", color: "inherit" }}>
           <span className="label">תיק עבודות</span>
           <h4>כל תוצר נשמר ליד השיעור שלו.</h4>
-          <p className="lines"><span>תמונה, תיאור ושם, לכל משתתף.</span><span>נשמר במכשיר, בלי חשבון ובלי שרת.</span></p>
+          <p className="lines"><span>תמונה, תיאור ושם, לכל משתתף.</span><span>עם <strong>קוד סנכרון</strong>: בכל המכשירים שלך, בלי חשבון.</span></p>
         </a>
         <a className="press tone tone-neutral" href={href("feature")} style={{ textDecoration: "none", color: "inherit" }}>
-          <span className="label">כתבה</span>
-          <h4>שפת תבניות לשיחה עם מכונה.</h4>
-          <p className="lines"><span>מה <strong>כריסטופר אלכסנדר</strong> <span className="latin">Christopher Alexander</span> מלמד על פרומפטים.</span><span>עם דוגמה מ<strong>אשדוד</strong> <span className="latin">Ashdod</span>.</span></p>
+          <span className="label">כתבות</span>
+          <h4>ארבעה הוגים, ארבעה שיעורים בפרומפט.</h4>
+          <p className="lines"><span><strong>אלכסנדר</strong>, <strong>ג'ייקובס</strong>, <strong>לה קורבוזיה</strong> ו<strong>ויטרוביוס</strong>, מחוברים לשיעורים.</span><span>עם ציטוט מהמקור, הייקו ודוגמה מ<strong>אשדוד</strong> <span className="latin">Ashdod</span>.</span></p>
         </a>
       </div>
 
       <div className="inspire">
         <span>בהשראת <strong>שפת תבניות</strong> <span className="latin">A Pattern Language</span>, כריסטופר אלכסנדר, <bdi className="num">1977</bdi>: כל שיעור הוא תבנית שאפשר להפעיל שוב ושוב.</span>
-        <span>ההתקדמות נשמרת במכשיר הזה.</span>
+        <a href={href("sync")} style={{ color: "inherit" }}>ההתקדמות נשמרת במכשיר, ובקוד סנכרון גם בשרת.</a>
       </div>
     </main>
   );

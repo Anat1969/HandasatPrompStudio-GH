@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Rich, { Lines } from "../components/Rich";
 import { IconCopy, IconNext, IconPlay, IconPrev, IconX } from "../components/Icons";
-import Deck from "../components/Deck";
+import Deck, { deckFor } from "../components/Deck";
 import { ORDER, TRACK_HEX, byId, trackOf } from "../data/course";
 import { assemble, stepPrompt } from "../lib/prompt";
 import { go, href } from "../lib/route";
@@ -84,11 +84,10 @@ export default function Lesson({ id, editing, toast }: { id: string; editing: bo
             <Rich>{l.lead}</Rich>
             <Rich>{l.summary}</Rich>
           </p>
-          {l.deck && (
-            <div style={{ marginTop: 16 }}>
-              <button className="press btn btn-main" onClick={() => setDeck(true)}><IconPlay width={16} height={16} />צפה במצגת השיעור</button>
-            </div>
-          )}
+          <div style={{ marginTop: 16, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <button className="press btn btn-main" onClick={() => setDeck(true)}><IconPlay width={16} height={16} />צפה במצגת השיעור</button>
+            <span className="mode-note"><bdi className="num">{deckFor(l).length}</bdi> שקפים{l.deck ? " · המצגת המקורית של הקורס" : " · נבנתה מתוכן השיעור"}. חיצים לניווט, Esc לסגירה.</span>
+          </div>
 
           <h2 className="section-title">שלושה שלבים, שלושה תוצרים</h2>
           <p className="section-lead">לחיצה על המספר מסמנת שלב כבוצע. לכל שלב פרומפט פתיחה בשלוש שכבות, מוכן להעתקה.</p>
@@ -187,7 +186,7 @@ export default function Lesson({ id, editing, toast }: { id: string; editing: bo
           </div>
         </aside>
       </div>
-      {deck && <Deck onClose={() => setDeck(false)} />}
+      {deck && <Deck lesson={l} onClose={() => setDeck(false)} />}
     </main>
   );
 }

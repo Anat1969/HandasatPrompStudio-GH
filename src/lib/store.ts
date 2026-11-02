@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 // שמירה אוטומטית ב-localStorage, עם חיווי "נשמר". עטוף ב-try כי אחסון עלול להיות חסום.
 const PREFIX = "hps:";
+export const PREFIX_PUBLIC = PREFIX;
 export function load<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(PREFIX + key);
@@ -10,9 +11,18 @@ export function load<T>(key: string, fallback: T): T {
     return fallback;
   }
 }
-export function save(key: string, value: unknown) {
+// חותמת זמן לכל מפתח, כדי שהסנכרון ידע איזו גרסה חדשה יותר
+export const TS_KEY = PREFIX + "_ts";
+export function stamps(): Record<string, number> {
+  try { return JSON.parse(localStorage.getItem(TS_KEY) || "{}"); } catch { return {}; }
+}
+export function save(key: string, value: unknown, at = Date.now()) {
   try {
     localStorage.setItem(PREFIX + key, JSON.stringify(value));
+    if (!key.startsWith("sync:")) {
+      const ts = stamps(); ts[key] = at;
+      localStorage.setItem(TS_KEY, JSON.stringify(ts));
+    }
     window.dispatchEvent(new CustomEvent("hps-store", { detail: key }));
     return true;
   } catch {
@@ -52,7 +62,7 @@ export function exportAll() {
   const out: Record<string, unknown> = {};
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i)!;
-    if (k.startsWith(PREFIX)) out[k.slice(PREFIX.length)] = JSON.parse(localStorage.getItem(k)!);
+    if (k.startsWith(PREFIX) && k !== TS_KEY) out[k.slice(PREFIX.length)] = JSON.parse(localStorage.getItem(k)!);
   }
   return out;
 }

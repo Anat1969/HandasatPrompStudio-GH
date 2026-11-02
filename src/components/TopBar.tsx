@@ -9,7 +9,7 @@ const TABS = [
   ["lessons", "שיעורים"],
   ["studio", "סטודיו פרומפטים"],
   ["portfolio", "תיק עבודות"],
-  ["feature", "כתבה"],
+  ["feature", "כתבות"],
 ] as const;
 
 type Hit = { cat: string; lesson: number; title: string; sub: string };

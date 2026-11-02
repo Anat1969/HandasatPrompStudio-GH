@@ -5,11 +5,14 @@ import Lessons from "./pages/Lessons";
 import Lesson from "./pages/Lesson";
 import Studio from "./pages/Studio";
 import Portfolio from "./pages/Portfolio";
-import Feature from "./pages/Feature";
+import Feature from "./pages/Articles";
+import Sync from "./pages/Sync";
+import { onStatus, startSync } from "./lib/sync";
+import { href } from "./lib/route";
 import { useRoute } from "./lib/route";
 import { exportAll, importAll, save, PROGRESS_KEY } from "./lib/store";
 
-const TITLES: Record<string, string> = { home: "הבית", lessons: "שיעורים", lesson: "שיעור", studio: "סטודיו פרומפטים", portfolio: "תיק עבודות", feature: "כתבה" };
+const TITLES: Record<string, string> = { home: "הבית", lessons: "שיעורים", lesson: "שיעור", studio: "סטודיו פרומפטים", portfolio: "תיק עבודות", feature: "כתבות", sync: "סנכרון" };
 
 export default function App() {
   const route = useRoute();
@@ -19,6 +22,8 @@ export default function App() {
   const setQ = (v: string) => { setQState(v); try { sessionStorage.setItem("hps:q", v); } catch { /* חסום */ } };
   const toast = (s: string) => { setMsg(s); window.setTimeout(() => setMsg(""), 2200); };
 
+  const [sync, setSync] = useState("off");
+  useEffect(() => { startSync(); return onStatus((s) => setSync(s.state)); }, []);
   useEffect(() => { document.title = `${TITLES[route.page] || "הבית"} · הנדסת פרומפטים`; }, [route.page]);
 
   // פעולות העריכה והמערכת נכנסות לכפתור הלוגו, לא לסרגל
@@ -26,6 +31,7 @@ export default function App() {
     const menu = document.querySelector("ai-menu") as any;
     if (!menu) return;
     menu.items = [
+      { label: sync === "off" ? "סנכרון בין מכשירים" : "סנכרון: קוד ומצב", onSelect: () => { location.hash = href("sync"); } },
       { label: "מצב עריכה", pressed: editing, onSelect: () => setEditing((e) => !e) },
       { label: "ייצוא התקדמות וטיוטות", onSelect: () => {
         const blob = new Blob([JSON.stringify(exportAll(), null, 1)], { type: "application/json" });
@@ -39,8 +45,8 @@ export default function App() {
       } },
       ...(editing ? [{ label: "איפוס ההתקדמות", onSelect: () => { if (confirm("לאפס את סימוני הביצוע בכל השיעורים?")) { save(PROGRESS_KEY, {}); toast("ההתקדמות אופסה"); } } }] : []),
     ];
-    menu.status = editing ? "מצב עריכה" : "";
-  }, [editing]);
+    menu.status = [editing ? "מצב עריכה" : "", sync === "ok" ? "מסונכרן" : sync === "error" ? "שגיאת סנכרון" : sync === "busy" ? "מסנכרן" : ""].filter(Boolean).join(" · ");
+  }, [editing, sync]);
 
   let page;
   switch (route.page) {
@@ -48,7 +54,8 @@ export default function App() {
     case "lesson": page = <Lesson key={route.id} id={route.id || "1"} editing={editing} toast={toast} />; break;
     case "studio": page = <Studio toast={toast} />; break;
     case "portfolio": page = <Portfolio route={route} editing={editing} toast={toast} />; break;
-    case "feature": page = <Feature />; break;
+    case "feature": page = <Feature id={route.id} />; break;
+    case "sync": page = <Sync route={route} toast={toast} />; break;
     default: page = <Home />;
   }
 
@@ -59,7 +66,7 @@ export default function App() {
       <footer className="foot">
         <div className="foot-in">
           <span>הנדסת פרומפטים · קורס AI לאדריכלים · אד' ענת שטיבלמן A&I</span>
-          <span>ההתקדמות, הטיוטות ותיק העבודות נשמרים במכשיר הזה בלבד.</span>
+          <a href={href("sync")} style={{ color: "inherit" }}>{sync === "off" ? "נשמר במכשיר הזה. לסנכרון בין מכשירים: קוד סנכרון" : sync === "ok" ? "מסונכרן לשרת" : sync === "error" ? "שגיאת סנכרון: הנתונים שמורים במכשיר" : "מסנכרן..."}</a>
         </div>
       </footer>
       {msg && <div className="toast" role="status">{msg}</div>}

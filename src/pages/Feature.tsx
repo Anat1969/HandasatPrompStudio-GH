@@ -78,11 +78,11 @@ const LINKS = [
   { to: 21, rule: "תבנית בלי אימות משכפלת טעות.", insight: "AI ישכפל תקן שגוי בכל פרויקט, באותו ביטחון.", action: "הוסיפו לכל תבנית שורת אימות: מספר תקן ונושאו." },
 ];
 
-export default function Feature() {
+export function PatternArticle() {
   return (
     <main className="page">
       <article className="ft" dir="rtl">
-        <div className="ops no-print"><button className="press btn-quiet" onClick={() => window.print()}><IconPrint width={16} height={16} />הדפסה ל-A4</button></div>
+        <div className="ops no-print"><a className="press btn-quiet" href="#/feature">כל הכתבות</a><button className="press btn-quiet" onClick={() => window.print()}><IconPrint width={16} height={16} />הדפסה ל-A4</button></div>
         <figure className="ft-hero" style={{ margin: 0 }}>
           <PatternNet />
           <div className="ft-head">
@@ -178,6 +178,10 @@ export default function Feature() {
               <li>שיעורים 09, 11, 19 ו-21 בקורס הזה.</li>
             </ol>
           </section>
+          <a className="press ft-link no-print" href="#/feature/jacobs" style={{ marginTop: 24 }}>
+            <span className="label">הכתבה הבאה</span>
+            <span><b>עיניים על הרחוב.</b></span>
+          </a>
         </div>
       </article>
     </main>

@@ -4,7 +4,7 @@ import { IconX } from "../components/Icons";
 import { ORDER, TRACK_HEX, byId } from "../data/course";
 import { allWorks, compress, delWork, putWork, type Work } from "../lib/idb";
 import { href, setParams, type Route } from "../lib/route";
-import { useStored } from "../lib/store";
+import { load, save, useStored } from "../lib/store";
 
 export default function Portfolio({ route, editing, toast }: { route: Route; editing: boolean; toast: (s: string) => void }) {
   const [students, setStudents] = useStored<string[]>("students", []);
@@ -21,13 +21,17 @@ export default function Portfolio({ route, editing, toast }: { route: Route; edi
   const filter = (route.params.s || "").split(",").filter(Boolean);
 
   const refresh = () => allWorks().then((w) => setWorks(w.sort((a, b) => b.at - a.at))).catch(() => setErr("הדפדפן חוסם אחסון מקומי. פתחו את האתר בחלון רגיל (לא פרטי)."));
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    refresh();
+    window.addEventListener("hps-works", refresh);
+    return () => window.removeEventListener("hps-works", refresh);
+  }, []);
   useEffect(() => { if (route.params.l) setLesson(Number(route.params.l)); }, [route.params.l]);
 
   const take = async (f?: File | null) => {
     if (!f) return;
     setErr("");
-    try { setImg(await compress(f)); } catch (e: any) { setErr(e.message || "לא הצלחתי לקרוא את הקובץ."); }
+    try { setImg(await compress(f, 1100)); } catch (e: any) { setErr(e.message || "לא הצלחתי לקרוא את הקובץ."); }
   };
   useEffect(() => {
     const on = (e: ClipboardEvent) => {
@@ -57,7 +61,7 @@ export default function Portfolio({ route, editing, toast }: { route: Route; edi
       await putWork({ id: String(Date.now()), student: me, lesson, desc: desc.trim(), img, at: Date.now() });
       setImg(""); setDesc("");
       toast("העבודה נשמרה בתיק");
-      refresh();
+      window.dispatchEvent(new Event("hps-works"));
     } catch {
       setErr("האחסון במכשיר מלא. מחקו עבודות ישנות במצב עריכה, ונסו שוב.");
     }
@@ -73,7 +77,7 @@ export default function Portfolio({ route, editing, toast }: { route: Route; edi
       <h1 className="page-title">כל תוצר, ליד השיעור שלו.</h1>
       <p className="page-sub lines">
         <span>מעלים צילום של התוצר, מתארים במשפט, ובוחרים שיעור.</span>
-        <span>הכול נשמר <strong>במכשיר הזה</strong>, בלי חשבון ובלי שרת. לגיבוי: ייצוא מתוך כפתור הלוגו.</span>
+        <span>הכול נשמר <strong>במכשיר הזה</strong>, ועם <a href="#/sync">קוד סנכרון</a> גם בשרת ובכל מכשיר שלך.</span>
       </p>
 
       <div className="port" style={{ marginTop: 24 }}>
@@ -137,7 +141,7 @@ export default function Portfolio({ route, editing, toast }: { route: Route; edi
                       <span className="who"><b>{w.student}</b>{l && <a href={href("lesson", String(l.id))} className="src">שיעור {l.code}</a>}</span>
                       {w.desc && <span>{w.desc}</span>}
                       <span className="src">{new Date(w.at).toLocaleDateString("he-IL")}</span>
-                      {editing && <button className="press btn-quiet" onClick={async () => { await delWork(w.id); refresh(); }}>מחיקה</button>}
+                      {editing && <button className="press btn-quiet" onClick={async () => { await delWork(w.id); save("works:deleted", [...load<string[]>("works:deleted", []), w.id]); window.dispatchEvent(new Event("hps-works")); }}>מחיקה</button>}
                     </figcaption>
                   </figure>
                 );

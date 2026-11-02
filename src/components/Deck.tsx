@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import Rich from "./Rich";
 import { IconNext, IconPrev, IconX } from "./Icons";
+import { TRACKS, byId, trackOf, type Lesson } from "../data/course";
+import { stepPrompt } from "../lib/prompt";
 
 // מצגת שיעור 01, מתוך הגרסה המקורית. התוכן זוקק: תובנה בכל שקף, משפט בכל שורה.
-type Slide = { k: string; title: string; sub?: string; list?: string[]; big?: string; cols?: { h: string; t: string; tone?: "bad" | "good" }[] };
+export type Slide = { k: string; title: string; sub?: string; list?: string[]; big?: string; cols?: { h: string; t: string; tone?: "bad" | "good" }[] };
 
-const SLIDES: Slide[] = [
+const SLIDES_01: Slide[] = [
   { k: "פתיחה", title: "הסוד לתשובות מדויקות.", sub: "איך הופכים את Claude מעוזר כללי למומחה אישי, בעזרת **שלוש רמות בקרה**." },
   { k: "הבעיה", title: "תשובה בינונית היא לא אשמת הכלי.", sub: "שואלים, מקבלים תשובה. לפעמים טובה, לפעמים פחות. ==הבעיה בשיטה, לא בכלי.==" },
   { k: "המחיר", big: "70%", title: "מהפוטנציאל לא ממומש.", sub: "כשעובדים רק ברמת הצ'אט. הערכה של מחברת הקורס, לא מדידה." },
@@ -29,7 +31,37 @@ const SLIDES: Slide[] = [
   { k: "סיום", title: "הפסיקו לעבוד קשה. התחילו לעבוד חכם.", sub: "==תשובות שמותאמות לאופן שבו אתם עובדים.== התרגיל: לבנות את שלוש השכבות שלכם." },
 ];
 
-export default function Deck({ onClose }: { onClose: () => void }) {
+const sentences = (t: string) => t.split(/(?<=[.?!])\s+/).filter(Boolean);
+
+// מצגת לכל שיעור, נגזרת מתוכן השיעור בלבד: תובנה, מקום בבניין, שלבים, פרומפט, דוגמה ושאלות.
+export function deckFor(l: Lesson): Slide[] {
+  if (l.id === 1) return SLIDES_01;
+  const t = trackOf(l.track);
+  const floor = TRACKS.indexOf(t) + 1;
+  const p = stepPrompt(l, l.steps[0]);
+  const ex = sentences(l.example);
+  return [
+    { k: "פתיחה", title: l.title, sub: `${l.lead}` },
+    { k: "התובנה", title: "המשפט שלוקחים הביתה.", sub: `==${l.insight}==` },
+    { k: "למה", title: t.q + "?", sub: l.summary },
+    { k: "המקום בבניין", title: `קומה ${floor}: ${t.name}.`, sub: t.lead, list: t.lessons.map((id) => {
+      const x = byId(id)!;
+      return id === l.id ? `**${x.code} · ${x.title}** (השיעור הזה)` : `${x.code} · ${x.title}`;
+    }) },
+    ...l.steps.map((st) => ({ k: `שלב ${st.num}`, title: `${st.title}.`, sub: st.desc, list: [`**התוצר:** ${st.deliverable}`] })),
+    { k: "פרומפט פתיחה", title: "שלוש שכבות, מוכנות להעתקה.", list: [
+      `**הגדרות:** ${p.settings.split("\n")[0]}`,
+      `**פרויקט:** ${p.project.split("\n")[0]}`,
+      `**צ'אט:** ${p.chat.split("\n")[0]}`,
+    ] },
+    { k: "דוגמה", title: "כך זה נראה כשזה עובד.", list: ex.slice(0, 5), sub: ex.length > 5 ? "המשך הדוגמה בדף השיעור. המספרים להמחשה." : "המספרים בדוגמה להמחשה." },
+    { k: "שאלות", title: "שתי שאלות שעולות תמיד.", cols: l.faq.slice(0, 3).map((f) => ({ h: f.question, t: f.answer })) },
+    { k: "סיום", title: "התרגיל: שלושה תוצרים.", sub: `==${l.insight}==`, list: l.steps.map((st) => `**${st.num}** ${st.title}`) },
+  ];
+}
+
+export default function Deck({ lesson, onClose }: { lesson: Lesson; onClose: () => void }) {
+  const SLIDES = deckFor(lesson);
   const [i, setI] = useState(0);
   const s = SLIDES[i];
   const nxt = () => setI((x) => Math.min(SLIDES.length - 1, x + 1));
@@ -45,10 +77,10 @@ export default function Deck({ onClose }: { onClose: () => void }) {
     return () => { window.removeEventListener("keydown", on); document.body.style.overflow = ""; };
   }, []); // eslint-disable-line
   return (
-    <div className="overlay" role="dialog" aria-modal="true" aria-label="מצגת שיעור 01" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className="overlay" role="dialog" aria-modal="true" aria-label={`מצגת שיעור ${lesson.code}`} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="deck">
         <div className="deck-top">
-          <span>שיעור 01 · שליטה מיטבית ב-AI</span>
+          <span>שיעור {lesson.code} · {lesson.kicker}</span>
           <span style={{ display: "flex", gap: 6, alignItems: "center" }}>
             <span>{s.k} · <bdi className="num">{i + 1}/{SLIDES.length}</bdi></span>
             <button className="press icon-btn" onClick={onClose} aria-label="סגירת המצגת" title="סגירה (Esc)"><IconX /></button>
