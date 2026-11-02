@@ -11,7 +11,7 @@ import { PatternArticle } from "./Feature";
 type Link = { to: number; rule: string; insight: string; action: string };
 type Art = {
   id: string; kind: string; kicker: string; title: string; deck: string;
-  layout: "full" | "split" | "strip" | "collage"; layoutName: string;
+  layout: "full" | "split" | "strip" | "collage" | "infographic"; layoutName: string;
   Hero: () => ReactNode; caption: string;
   body: string[];
   quote: { tr: string; orig: string; origDir: "ltr" | "rtl"; cite: string };
@@ -126,6 +126,45 @@ function Triad({ k }: { k: 0 | 1 | 2 }) {
       <text x="300" y="262" textAnchor="end" fill={color} style={{ ...T, fontSize: 18, fontWeight: 700 }}>{label[0]}</text>
       <text x="20" y="262" fill="#7C808A" style={{ ...M, fontSize: 13, fontStyle: "italic" }}>{label[1]}</text>
       <text x="300" y="286" textAnchor="end" fill="#4E525B" style={{ ...T, fontSize: 13 }}>{`שכבת ה${label[2]}`}</text>
+    </svg>
+  );
+}
+
+
+function ContextFlow() {
+  // בהשראת מינאר: רוחב הסרט הוא כמות ההקשר שהמודל מחזיק, מפנייה לפנייה. הרוחבים להמחשה.
+  const X = [1030, 810, 590, 370, 150];
+  const top = [64, 48, 34, 20, 8];
+  const lost = ["המגרש", "התקן", "הלקוח", "הטון"];
+  const band = (y: number, w: number[]) =>
+    [...X.map((x, i) => `${x},${y - w[i] / 2}`), ...[...X].reverse().map((x, i) => `${x},${y + w[w.length - 1 - i] / 2}`)].join(" ");
+  return (
+    <svg viewBox="0 0 1100 500" role="img" aria-label="שני סרטים: בצ'אט בלבד ההקשר נמס מפנייה לפנייה, בשלוש שכבות הוא נשמר" style={{ direction: "ltr", display: "block", width: "100%", height: "auto" }}>
+      <rect width="1100" height="500" fill="#F7F5EF" />
+      <text x="1070" y="52" textAnchor="end" fill="#B8322A" style={{ ...T, fontSize: 16, fontWeight: 700 }}>רק בצ'אט: ההקשר נמס</text>
+      <polygon points={band(150, top)} fill="#E2B04A" opacity=".9" />
+      {lost.map((l, i) => {
+        const x = (X[i] + X[i + 1]) / 2;
+        return (
+          <g key={l}>
+            <line x1={x} y1={150 - top[i] / 2 - 4} x2={x} y2={92} stroke="#B8322A" strokeWidth="1.2" />
+            <text x={x} y={84} textAnchor="middle" fill="#B8322A" style={{ ...T, fontSize: 13 }}>{`נשכח: ${l}`}</text>
+          </g>
+        );
+      })}
+      <text x="1070" y="272" textAnchor="end" fill="#1E7A55" style={{ ...T, fontSize: 16, fontWeight: 700 }}>שלוש שכבות: ההקשר נוסע עם כל פנייה</text>
+      <polygon points={band(350, [64, 64, 64, 64, 64])} fill="#16365F" opacity=".88" />
+      <text x="590" y="355" textAnchor="middle" fill="#E9EEF5" style={{ ...T, fontSize: 13 }}>הגדרות + פרויקט: מגרש, תקן, לקוח, טון</text>
+      {X.map((x, i) => (
+        <g key={x}>
+          <line x1={x} y1={190} x2={x} y2={310} stroke="#9A9EA6" strokeDasharray="3 4" />
+          <text x={x + 4} y={440} textAnchor="end" fill="#4E525B" style={{ ...T, fontSize: 13 }}>פנייה</text>
+          <text x={x + 10} y={440} fill="#15171C" style={{ ...M, fontSize: 13, fontWeight: 600 }}>{i + 1}</text>
+        </g>
+      ))}
+      <line x1="1050" y1="465" x2="130" y2="465" stroke="#15171C" strokeWidth="1.2" />
+      <polygon points="130,465 142,459 142,471" fill="#15171C" />
+      <text x="1070" y="490" textAnchor="end" fill="#7C808A" style={{ ...T, fontSize: 12 }}>כיוון השיחה. רוחב הסרט: כמות ההקשר שהמודל מחזיק (להמחשה, לא מדידה)</text>
     </svg>
   );
 }
@@ -247,6 +286,45 @@ export const ARTICLES: Art[] = [
     ],
     inspiration: "ויטרוביוס, על האדריכלות",
   },
+  {
+    id: "minard", kind: "אינפוגרפיקה", kicker: "אינפוגרפיקה · זרימה ואובדן", title: "מה נשאר בדרך.",
+    deck: "ב-**1869** שרטט **שארל ז'וזף מינאר** צבא שנמס בשלג. אותו שרטוט מראה מה קורה להקשר בשיחה ארוכה עם מכונה.",
+    layout: "infographic", layoutName: "אינפוגרפיקה מובילה, וגוף בשני טורים", Hero: ContextFlow,
+    caption: "בהשראת מינאר: שני סרטים, אותה שיחה. רוחב הסרט הוא ההקשר שהמודל מחזיק. הרוחבים להמחשה. איור בקוד.",
+    body: [
+      "המהנדס הצרפתי **שארל ז'וזף מינאר** ~~Charles Joseph Minard~~ שרטט ב-**1869** את מסע **נפוליאון** ~~Napoleon~~ לרוסיה ב-**1812**. רוחב הסרט הוא גודל הצבא: **422,000** חיילים ביציאה, כ-**100,000** במוסקבה, ו-**10,000** שחזרו. ^^(Carte figurative des pertes successives en hommes de l'Armée Française dans la campagne de Russie, 1869)^^",
+      "בשרטוט אחד יש שישה נתונים: גודל הצבא, מיקום בשני צירים, כיוון התנועה, הטמפרטורה בנסיגה ותאריכים. לא צריך לקרוא מספר כדי להבין. ==הסרט נמס, וזה כל הסיפור.==",
+      "שיחה ארוכה עם מודל היא מסע כזה. בפנייה הראשונה כתבתם הכול: **מגרש** ב**אשדוד** ~~Ashdod~~, **3** כיתות, **ת\"י 1045**, ולקוח עירוני. בפנייה החמישית, בצ'אט חדש, נשארה רק השאלה.",
+      "זה לא כשל של המודל. זה כשל של **שכבות**: מה שנכתב בצ'אט נעלם בצ'אט הבא. מה שנכתב בהגדרות ובפרויקט נוסע עם כל פנייה. בשרטוט, הסרט העליון נמס, והתחתון שומר על רוחבו.",
+    ],
+    quote: {
+      tr: "\"ייתכן שזו הגרפיקה הסטטיסטית הטובה ביותר שצוירה אי פעם.\"",
+      orig: "\"It may well be the best statistical graphic ever drawn.\"",
+      origDir: "ltr", cite: "אדוארד טאפטי, The Visual Display of Quantitative Information, Graphics Press, 1983",
+    },
+    after: [
+      "**הכלל המעשי:** לפני שיחה ארוכה, ציירו לעצמכם את הסרט. מה חייב להגיע עד הפנייה האחרונה? את זה מעבירים לשכבת הפרויקט, ולא כותבים שוב בצ'אט.",
+      "**ובדיקה אחת באמצע:** בפנייה השלישית, בקשו מהמודל לסכם במשפט אחד מה הוא יודע על הפרויקט. אם המגרש או התקן חסרים, הסרט כבר נמס.",
+    ],
+    insight: "מה שנכתב רק בצ'אט, נמס בדרך.",
+    haiku: ["נהר של שלג", "הסרט מצטמק", "קו שחור חוזר"],
+    haikuNote: "מה ההייקו מאיר: אובדן נראה לפני שקוראים אותו. גם אובדן של הקשר.",
+    links: [
+      { to: 3, rule: "שותף מחקר נבנה בסבבי משוב.", insight: "כל סבב מוסיף רוחב לסרט, רק אם ההקשר נשמר.", action: "בסבב השלישי, בקשו מהמודל לסכם מה הוא יודע על הפרויקט." },
+      { to: 12, rule: "התובנה נמצאת בין המקורות.", insight: "מקור שהועלה למחברת הוא הקשר שלא נמס.", action: "העלו את מסמכי הפרויקט פעם אחת, במקום להדביק אותם בכל שאלה." },
+      { to: 22, rule: "בלי תאריך, תכנית נשארת רעיון.", insight: "תכנית פעולה היא מסע ארוך, שמאבד פרטים בכל שלב.", action: "פתחו כל שלב בשורה אחת: מה נקבע עד עכשיו." },
+    ],
+    post: `ב-1869 שארל ז'וזף מינאר שרטט את הצבא של נפוליאון כסרט: 422,000 חיילים יצאו, 10,000 חזרו. רואים את האובדן לפני שקוראים מספר.
+ככה נראית גם שיחה ארוכה עם AI. בפנייה הראשונה כתבתי מגרש, תקן ולקוח. בפנייה החמישית נשארה רק השאלה.
+הפתרון לא בניסוח טוב יותר, אלא בשכבות: מה שחייב להגיע עד הסוף עובר להגדרות הפרויקט, ולא נכתב שוב בצ'אט.
+מה הפרט שהמודל שלכם שוכח הכי מהר?`,
+    sources: [
+      "Charles Joseph Minard, Carte figurative des pertes successives en hommes de l'Armée Française dans la campagne de Russie 1812-1813, 1869.",
+      "Edward R. Tufte, The Visual Display of Quantitative Information, Graphics Press, 1983.",
+      "שיעורים 03, 12 ו-22 בקורס הזה.",
+    ],
+    inspiration: "שארל ז'וזף מינאר, 1869",
+  },
 ];
 
 export const ALL = [
@@ -278,10 +356,14 @@ function ArticleView({ a }: { a: Art }) {
       )}
       {a.layout === "strip" && (<><Head a={a} /><figure className="ft-strip" style={{ margin: 0 }}><a.Hero /></figure></>)}
       {a.layout === "collage" && (<><Head a={a} /><figure style={{ margin: 0 }}><a.Hero /></figure></>)}
+      {a.layout === "infographic" && (<><Head a={a} /><figure className="ft-info" style={{ margin: 0 }}><a.Hero /></figure></>)}
       <figcaption className="ft-caption">{a.caption}</figcaption>
 
+      {a.layout === "infographic" && (
+        <div className="ft-two">{a.body.map((p, i) => <Rich key={i} as="p" className={i === 0 ? "ft-p ft-drop" : "ft-p"}>{p}</Rich>)}</div>
+      )}
       <div className="ft-col">
-        {a.body.map((p, i) => <Rich key={i} as="p" className={i === 0 ? "ft-p ft-drop" : "ft-p"}>{p}</Rich>)}
+        {a.layout !== "infographic" && a.body.map((p, i) => <Rich key={i} as="p" className={i === 0 ? "ft-p ft-drop" : "ft-p"}>{p}</Rich>)}
         <blockquote className="ft-quote">
           <span className="tr-l">תרגום</span>
           <p className="tr">{a.quote.tr}</p>
@@ -333,7 +415,7 @@ function Index() {
     <main className="page">
       <div className="crumbs"><a href={href("home")}>הבית</a><span>/</span><span>כתבות</span></div>
       <div className="kicker">ריכוזי ידע</div>
-      <h1 className="page-title">ארבע כתבות, ארבעה אבות.</h1>
+      <h1 className="page-title">חמש כתבות, חמישה מקורות.</h1>
       <p className="page-sub lines">
         <span>כל כתבה מחברת הוגה אחד מהאדריכלות והעיר לשיעורים בקורס.</span>
         <span>בכל אחת: ציטוט מהמקור, <strong>תובנה</strong>, הייקו, חיבורים ופוסט מוכן. כל אחת בפריסה אחרת.</span>

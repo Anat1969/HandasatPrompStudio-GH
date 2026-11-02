@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { IconCopy } from "../components/Icons";
-import { code, connect, disconnect, learnerName, newCode, onStatus, pull, push, type SyncStatus } from "../lib/sync";
+import { code, cohort, connect, disconnect, learnerName, newCode, onStatus, pull, push, schedule, type SyncStatus } from "../lib/sync";
 import { href, type Route } from "../lib/route";
 import { save } from "../lib/store";
 import { copyText } from "./Lesson";
@@ -18,6 +18,8 @@ export default function Sync({ route, toast }: { route: Route; toast: (s: string
   const [c, setC] = useState(code());
   const [name, setName] = useState(learnerName());
   const [typed, setTyped] = useState(route.params.k || "");
+  const [kita, setKita] = useState(route.params.c || cohort());
+  useEffect(() => { if (route.params.c && !cohort()) { save("sync:cohort", route.params.c.toLowerCase()); schedule(); } }, [route.params.c]);
   const [busy, setBusy] = useState(false);
   useEffect(() => onStatus(setSt), []);
 
@@ -54,6 +56,11 @@ export default function Sync({ route, toast }: { route: Route; toast: (s: string
             </div>
             <label className="label" htmlFor="nm">שם (מופיע בתיק העבודות)</label>
             <input id="nm" className="field" value={name} maxLength={40} onChange={(e) => { setName(e.target.value); save("sync:name", e.target.value); }} />
+            <label className="label" htmlFor="kita">קוד כיתה (לא חובה): המרצה רואה את ההתקדמות שלך</label>
+            <input id="kita" className="field" dir="ltr" placeholder="kita-xxxxx-xxxxx" value={kita}
+              onChange={(e) => setKita(e.target.value)}
+              onBlur={() => { save("sync:cohort", kita.trim().toLowerCase()); schedule(); }} />
+            <p className="mode-note">המרצה רואה רק שם, סימוני שלבים ומספר עבודות. רפלקציות, טיוטות ותמונות לא נחשפים.</p>
             <button className="press btn-quiet" style={{ justifySelf: "start" }} onClick={() => { disconnect(); setC(""); toast("המכשיר נותק. הנתונים נשארו בשרת ובמכשיר."); }}>נתק את המכשיר הזה</button>
           </>
         ) : (

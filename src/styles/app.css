@@ -448,3 +448,23 @@ mark.added { background: rgba(255, 228, 92, .28); color: #FFF3B0; padding: 0 2px
 .article-card .meta { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-mute); border-top: 1px dashed var(--rule); padding-top: 10px; }
 @media (max-width: 900px) { .ft-triad { grid-template-columns: minmax(0, 1fr); } .ft-split-hero { grid-template-columns: minmax(0, 1fr); } }
 .section-lead mark.added { background: var(--marker); color: inherit; }
+
+/* מבט כיתה */
+.class-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 24px; }
+.class-kpis .card { display: grid; gap: 4px; }
+.class-kpis .big { font-size: 34px; line-height: 1.1; }
+.heat-wrap { overflow-x: auto; margin-top: 12px; background: var(--sheet); border: 1px solid var(--rule); box-shadow: var(--shadow-1); }
+.heat { border-collapse: collapse; font-size: 13px; min-width: 100%; }
+.heat th, .heat td { padding: 4px 3px; text-align: center; border-bottom: 1px solid var(--rule-soft); white-space: nowrap; }
+.heat th { font-family: var(--mono); font-size: 11.5px; font-weight: 600; color: var(--ink-soft); background: var(--sheet-2); position: sticky; top: 0; }
+.heat th a { color: inherit; text-decoration: none; }
+.heat th a:hover { color: var(--cyan); }
+.heat td i { display: block; width: 22px; height: 22px; margin: 0 auto; box-shadow: inset 0 0 0 1px rgba(0,0,0,.06); }
+.heat .h-name { text-align: start; padding-inline: 12px; font-family: var(--font); font-weight: 600; font-size: 14px; position: sticky; inset-inline-start: 0; background: var(--sheet); z-index: 1; }
+.heat .h-ago { color: var(--ink-mute); font-size: 12px; padding-inline: 10px; }
+.heat .h-sum td { background: var(--sheet-2); font-size: 12px; }
+@media (max-width: 900px) { .class-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ft-info { box-shadow: var(--shadow-2); border: 1px solid var(--rule); }
+.ft-two { max-width: 1100px; margin: 32px auto 0; column-count: 2; column-gap: 48px; column-rule: 1px solid var(--rule); font-size: 17px; line-height: 1.85; }
+.ft-two p { break-inside: avoid; margin: 0 0 18px; }
+@media (max-width: 900px) { .ft-two { column-count: 1; } }

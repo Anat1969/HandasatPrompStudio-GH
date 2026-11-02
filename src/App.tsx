@@ -7,12 +7,13 @@ import Studio from "./pages/Studio";
 import Portfolio from "./pages/Portfolio";
 import Feature from "./pages/Articles";
 import Sync from "./pages/Sync";
+import Class from "./pages/Class";
 import { onStatus, startSync } from "./lib/sync";
 import { href } from "./lib/route";
 import { useRoute } from "./lib/route";
 import { exportAll, importAll, save, PROGRESS_KEY } from "./lib/store";
 
-const TITLES: Record<string, string> = { home: "הבית", lessons: "שיעורים", lesson: "שיעור", studio: "סטודיו פרומפטים", portfolio: "תיק עבודות", feature: "כתבות", sync: "סנכרון" };
+const TITLES: Record<string, string> = { home: "הבית", lessons: "שיעורים", lesson: "שיעור", studio: "סטודיו פרומפטים", portfolio: "תיק עבודות", feature: "כתבות", sync: "סנכרון", class: "מבט כיתה" };
 
 export default function App() {
   const route = useRoute();
@@ -32,6 +33,7 @@ export default function App() {
     if (!menu) return;
     menu.items = [
       { label: sync === "off" ? "סנכרון בין מכשירים" : "סנכרון: קוד ומצב", onSelect: () => { location.hash = href("sync"); } },
+      { label: "מבט כיתה (למרצה)", onSelect: () => { location.hash = href("class"); } },
       { label: "מצב עריכה", pressed: editing, onSelect: () => setEditing((e) => !e) },
       { label: "ייצוא התקדמות וטיוטות", onSelect: () => {
         const blob = new Blob([JSON.stringify(exportAll(), null, 1)], { type: "application/json" });
@@ -56,6 +58,7 @@ export default function App() {
     case "portfolio": page = <Portfolio route={route} editing={editing} toast={toast} />; break;
     case "feature": page = <Feature id={route.id} />; break;
     case "sync": page = <Sync route={route} toast={toast} />; break;
+    case "class": page = <Class route={route} toast={toast} />; break;
     default: page = <Home />;
   }
 

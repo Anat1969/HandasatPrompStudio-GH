@@ -21,6 +21,10 @@ const AIMENU = fs.readFileSync(path.join(__dirname, '../public/ai-menu.js'));
     const pushed = [];
     await ctx.route('**/rest/v1/rpc/hps_push', (r) => { pushed.push(JSON.parse(r.request().postData())); r.fulfill({ status: 200, contentType: 'application/json', body: '{"updated_at":"2026-11-02T00:00:00Z"}' }); });
     await ctx.route('**/rest/v1/rpc/hps_pull', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(JSON.parse(r.request().postData()).p_key === 'aaaaa-bbbbb-ccccc' ? { name: 'רון', state: { 'progress': { v: { '13': [true, true, true] }, t: 9999999999999 } }, works: [], updated_at: 'x' } : null) }));
+    await ctx.route('**/rest/v1/rpc/hps_cohort', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+      { name: 'נועה', progress: { '1': [true, true, true], '7': [true, false, false] }, works: 2, updated_at: new Date().toISOString() },
+      { name: 'רון', progress: { '1': [true, true, true], '7': [true, true, false], '6': [true, true, true] }, works: 0, updated_at: '2026-10-01T00:00:00Z' },
+    ]) }));
     await ctx.route('**/functions/v1/hps-improve', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ provider: 'gemini', settings: 'ענה בעברית, בטון מקצועי.', project: 'אתה יועץ תכנון למבני חינוך.\nפרויקט: כיתה בבית ספר באשדוד.', chat: 'הצע תכנון לכיתה.', notes: [{ layer: 'project', change: 'נוסף תפקיד', why: 'המודל יודע מי הוא.' }] }) }));
     await p.goto(BASE, { waitUntil: 'networkidle' });
 
@@ -111,12 +115,21 @@ const AIMENU = fs.readFileSync(path.join(__dirname, '../public/ai-menu.js'));
 
     // כתבות
     await p.goto(BASE + '#/feature', { waitUntil: 'networkidle' });
-    ok(await p.locator('.article-card').count() === 4, 'ארבע כתבות באינדקס');
-    for (const id of ['patterns', 'jacobs', 'machine', 'vitruvius']) {
+    ok(await p.locator('.article-card').count() === 5, 'חמש כתבות באינדקס');
+    for (const id of ['patterns', 'jacobs', 'machine', 'vitruvius', 'minard']) {
       await p.goto(BASE + '#/feature/' + id, { waitUntil: 'networkidle' });
       const okA = await p.locator('.ft-quote').count() === 1 && await p.locator('.ft-haiku').count() === 1 && await p.locator('.ft-link').count() >= 4;
       ok(okA, `כתבה ${id}: ציטוט, הייקו, חיבורים`);
     }
+
+    // מבט כיתה
+    await p.goto(BASE + '#/class?c=kita-test-0000', { waitUntil: 'networkidle' });
+    await p.waitForSelector('table.heat');
+    ok(await p.locator('table.heat tbody tr').count() === 3, 'מבט כיתה: 2 משתתפים ושורת סיכום');
+    ok(await p.locator('table.heat thead th').count() === 24 + 4, 'מבט כיתה: 24 עמודות שיעור');
+    ok((await p.locator('.tone-problem').innerText()).includes('07'), 'מבט כיתה: מזהה את השיעור שנתקעים בו (07)');
+    ok((await p.locator('.class-kpis').innerText()).includes('1'), 'מבט כיתה: מי שלא עדכן שבוע');
+    ok(!(await p.locator('main').innerText()).includes('רפלקציה על'), 'מבט כיתה: בלי רפלקציות');
 
     // מצגת לכל שיעור
     for (const n of [7, 19, 30]) {
@@ -135,6 +148,10 @@ const AIMENU = fs.readFileSync(path.join(__dirname, '../public/ai-menu.js'));
     await p.waitForTimeout(400);
     ok(pushed.length >= 1 && pushed.at(-1).p_name === 'נועה' && pushed.at(-1).p_state.progress, 'סנכרון: נדחף לשרת עם ההתקדמות');
     ok(/^[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}$/.test(pushed.at(-1).p_key), 'סנכרון: קוד בפורמט קבוע');
+    await p.getByLabel(/קוד כיתה/).fill('kita-test-0000');
+    await p.getByLabel(/קוד כיתה/).blur();
+    await p.waitForTimeout(3500);
+    ok(pushed.at(-1).p_cohort === 'kita-test-0000', 'סנכרון: קוד כיתה נשלח לשרת');
     await p.getByRole('button', { name: 'נתק את המכשיר הזה' }).click();
     await p.getByLabel('קוד סנכרון קיים').fill('aaaaa-bbbbb-ccccc');
     await p.getByRole('button', { name: 'חבר ומזג' }).click();
@@ -178,7 +195,7 @@ const AIMENU = fs.readFileSync(path.join(__dirname, '../public/ai-menu.js'));
 
     for (const vp of [{ width: 390, height: 844 }, { width: 1280, height: 900 }]) {
       await p.setViewportSize(vp);
-      for (const h of ['', '#/lessons', '#/lesson/19', '#/studio', '#/portfolio', '#/feature', '#/feature/vitruvius', '#/feature/jacobs', '#/sync']) {
+      for (const h of ['', '#/lessons', '#/lesson/19', '#/studio', '#/portfolio', '#/feature', '#/feature/vitruvius', '#/feature/jacobs', '#/feature/minard', '#/sync', '#/class?c=kita-test-0000']) {
         await p.goto(BASE + h, { waitUntil: 'networkidle' });
         const over = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         ok(over <= 0, `בלי גלילה אופקית ${vp.width} ${h || 'בית'} (${over})`);

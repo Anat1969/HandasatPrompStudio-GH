@@ -18,7 +18,7 @@ async function rpc(fn: string, body: unknown) {
   const r = await fetch(URL_ + fn, { method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" }, body: JSON.stringify(body) });
   if (!r.ok) {
     const t = await r.text();
-    throw new Error(t.includes("too_fast") ? "too_fast" : t.includes("bad_") ? "הנתונים גדולים מדי לסנכרון" : "השרת לא זמין");
+    throw new Error(t.includes("too_fast") ? "too_fast" : t.includes("bad_cohort") ? "קוד כיתה: 8 עד 40 תווים, אותיות לועזיות קטנות, ספרות ומקף" : t.includes("bad_") ? "הנתונים גדולים מדי לסנכרון" : "השרת לא זמין");
   }
   return r.json();
 }
@@ -32,6 +32,14 @@ export const newCode = () => {
 };
 export const code = () => load<string>("sync:code", "");
 export const learnerName = () => load<string>("sync:name", "");
+export const cohort = () => load<string>("sync:cohort", "");
+export const newCohort = () => "kita-" + newCode().slice(0, 11);
+
+// מבט כיתה: שם, סימוני שלבים, מספר עבודות ועדכון אחרון. בלי רפלקציות ובלי תמונות.
+export type CohortRow = { name: string | null; progress: Record<string, boolean[]>; works: number; updated_at: string };
+export async function fetchCohort(code: string): Promise<CohortRow[]> {
+  return (await rpc("hps_cohort", { p_cohort: code.trim().toLowerCase() })) || [];
+}
 
 function collect() {
   const ts = stamps();
@@ -94,6 +102,7 @@ export async function pull() {
     const r = await rpc("hps_pull", { p_key: c });
     const n = r ? await mergeIn(r) : 0;
     if (r?.name && !learnerName()) save("sync:name", r.name);
+    if (r?.cohort && !cohort()) save("sync:cohort", r.cohort);
     set({ state: "ok", at: Date.now() });
     return n;
   } catch (e: any) {
@@ -112,7 +121,7 @@ export async function push() {
   try {
     const deleted = new Set(load<string[]>("works:deleted", []));
     const works = (await allWorks().catch(() => [] as Work[])).filter((w) => !deleted.has(w.id));
-    await rpc("hps_push", { p_key: c, p_name: learnerName(), p_state: collect(), p_works: works });
+    await rpc("hps_push", { p_key: c, p_name: learnerName(), p_state: collect(), p_works: works, p_cohort: cohort() || null });
     set({ state: "ok", at: Date.now() });
   } catch (e: any) {
     if (e.message === "too_fast") again = true;
