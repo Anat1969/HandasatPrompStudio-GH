@@ -11,7 +11,9 @@ import { PatternArticle } from "./Feature";
 type Link = { to: number; rule: string; insight: string; action: string };
 type Art = {
   id: string; kind: string; kicker: string; title: string; deck: string;
-  layout: "full" | "split" | "strip" | "collage" | "infographic"; layoutName: string;
+  layout: "full" | "split" | "strip" | "collage" | "infographic" | "qa" | "timeline"; layoutName: string;
+  qa?: { q: string; a: string }[];
+  timeline?: { year: string; title: string; text: string; lesson?: number }[];
   Hero: () => ReactNode; caption: string;
   body: string[];
   quote: { tr: string; orig: string; origDir: "ltr" | "rtl"; cite: string };
@@ -165,6 +167,62 @@ function ContextFlow() {
       <line x1="1050" y1="465" x2="130" y2="465" stroke="#15171C" strokeWidth="1.2" />
       <polygon points="130,465 142,459 142,471" fill="#15171C" />
       <text x="1070" y="490" textAnchor="end" fill="#7C808A" style={{ ...T, fontSize: 12 }}>כיוון השיחה. רוחב הסרט: כמות ההקשר שהמודל מחזיק (להמחשה, לא מדידה)</text>
+    </svg>
+  );
+}
+
+
+function ScoreSheet() {
+  // פרטיטורה כפרומפט: מפתח וקצב (הגדרות), הרכב (פרויקט), התיבה הנוכחית (צ'אט), ותיבת TACET
+  const staves = [70, 170];
+  const lines = (y: number) => [0, 1, 2, 3, 4].map((k) => <line key={k} x1="60" y1={y + k * 10} x2="1060" y2={y + k * 10} stroke="#15171C" strokeWidth="1" />);
+  const notes = [[690, 3], [740, 1], [790, 2], [840, 0], [890, 2], [940, 4]];
+  return (
+    <svg viewBox="0 0 1100 300" role="img" aria-label="פרטיטורה: מפתח וטמפו בתחילת השורה, שמות הכלים בצד, תיבה עם תווים, ותיבת שקט" style={{ direction: "ltr", display: "block", width: "100%", height: "auto" }}>
+      <rect width="1100" height="300" fill="#F7F5EF" />
+      {staves.map((y) => <g key={y}>{lines(y)}</g>)}
+      <line x1="60" y1="70" x2="60" y2="210" stroke="#15171C" strokeWidth="3" />
+      {[300, 640, 1000, 1060].map((x) => <line key={x} x1={x} y1="70" x2={x} y2="210" stroke="#15171C" strokeWidth="1.2" />)}
+      <rect x="66" y="58" width="130" height="164" fill="#16365F" opacity=".1" stroke="#16365F" />
+      <text x="80" y="104" fill="#16365F" style={{ ...M, fontSize: 34, fontWeight: 600 }}>4</text>
+      <text x="80" y="134" fill="#16365F" style={{ ...M, fontSize: 34, fontWeight: 600 }}>4</text>
+      <text x="120" y="50" fill="#16365F" style={{ fontFamily: "serif", fontSize: 18, fontStyle: "italic", fontWeight: 700 }}>Allegro</text>
+      <text x="196" y="250" textAnchor="end" fill="#16365F" style={{ ...T, fontSize: 14, fontWeight: 700 }}>הגדרות: חל על הכול</text>
+      <text x="40" y="96" textAnchor="end" fill="#2E7D7A" style={{ ...T, fontSize: 13, fontWeight: 700 }}>כינור</text>
+      <text x="40" y="196" textAnchor="end" fill="#2E7D7A" style={{ ...T, fontSize: 13, fontWeight: 700 }}>צ'לו</text>
+      <text x="60" y="290" fill="#2E7D7A" style={{ ...T, fontSize: 14, fontWeight: 700 }}>פרויקט: ההרכב</text>
+      <rect x="644" y="58" width="352" height="164" fill="#B5652B" opacity=".08" stroke="#B5652B" />
+      {notes.map(([x, k], i) => (
+        <g key={i}>
+          <ellipse cx={x} cy={110 - k * 5} rx="8" ry="6" fill="#15171C" transform={`rotate(-20 ${x} ${110 - k * 5})`} />
+          <line x1={x + 7} y1={110 - k * 5} x2={x + 7} y2={110 - k * 5 - 34} stroke="#15171C" strokeWidth="1.5" />
+        </g>
+      ))}
+      <text x="700" y="160" fill="#15171C" style={{ fontFamily: "serif", fontSize: 18, fontStyle: "italic", fontWeight: 700 }}>mf</text>
+      <text x="996" y="250" textAnchor="end" fill="#B5652B" style={{ ...T, fontSize: 14, fontWeight: 700 }}>צ'אט: התיבה של עכשיו</text>
+      <text x="470" y="186" textAnchor="middle" fill="#B8322A" style={{ ...M, fontSize: 18, fontWeight: 700, letterSpacing: ".1em" }}>TACET</text>
+      <text x="470" y="250" textAnchor="middle" fill="#B8322A" style={{ ...T, fontSize: 13 }}>מגבלה היא הוראה: "שותק"</text>
+    </svg>
+  );
+}
+
+function FogStand() {
+  // מהחיפושית לביתן: פני שטח עם גבשושיות שאוספים טל, מתורגמים לגג הצללה על חולות החוף
+  const bumps = Array.from({ length: 14 }, (_, i) => 120 + i * 62);
+  return (
+    <svg viewBox="0 0 1100 320" role="img" aria-label="מעקרון בטבע למבנה: גבשושיות שאוספות טיפות, וגג הצללה על חולות" style={{ direction: "ltr", display: "block", width: "100%", height: "auto" }}>
+      <rect width="1100" height="320" fill="#16365F" />
+      <path d="M0 270 C 180 240, 300 290, 480 262 S 820 236, 1100 268 L1100 320 L0 320 Z" fill="#E2C48A" opacity=".85" />
+      <path d="M90 150 Q 550 70 1010 150" fill="none" stroke="#E9EEF5" strokeWidth="4" />
+      {bumps.map((x) => {
+        const t = (x - 90) / 920, y = 150 - Math.sin(Math.PI * t) * 40;
+        return <g key={x}><circle cx={x} cy={y - 6} r="6" fill="#E9EEF5" /><circle cx={x + 3} cy={y + 18} r="3.5" fill="#7FD3E6" /></g>;
+      })}
+      {[180, 400, 700, 920].map((x) => <line key={x} x1={x} y1={150 - Math.sin(Math.PI * ((x - 90) / 920)) * 40} x2={x} y2="262" stroke="#E9EEF5" strokeWidth="3" />)}
+      {[0, 1, 2, 3, 4, 5].map((i) => <path key={i} d={`M${30 + i * 18} ${40 + i * 14} q 40 -10 80 0`} stroke="#E9EEF5" strokeWidth="1.5" fill="none" opacity=".5" />)}
+      <text x="1070" y="40" textAnchor="end" fill="#E9EEF5" style={{ ...T, fontSize: 15, fontWeight: 700 }}>עיקרון: גבשושית אוספת טיפה, שקע מוביל אותה</text>
+      <text x="1070" y="62" textAnchor="end" fill="#E9EEF5" style={{ ...T, fontSize: 13, opacity: .8 }}>מבנה: גג הצללה שאוסף טל מרוח הים (רעיון לתרגיל, לא פרויקט קיים)</text>
+      <text x="40" y="300" fill="#16365F" style={{ ...T, fontSize: 13, fontWeight: 600 }}>חולות החוף</text>
     </svg>
   );
 }
@@ -325,6 +383,97 @@ export const ARTICLES: Art[] = [
     ],
     inspiration: "שארל ז'וזף מינאר, 1869",
   },
+  {
+    id: "score", kind: "ראיון", kicker: "שאלות ותשובות · מוזיקה ומבנה", title: "התווים הם פרומפט.",
+    deck: "פרטיטורה לא מנגנת. היא אומרת למי, באיזה קצב, ומה עכשיו. **שלוש שכבות**, כתובות על חמישה קווים.",
+    layout: "qa", layoutName: "שאלות ותשובות: שיחה עם הקורא", Hero: ScoreSheet,
+    caption: "פרטיטורה כפרומפט: מפתח וטמפו (הגדרות), ההרכב (פרויקט), התיבה הנוכחית (צ'אט), ותיבת שקט. איור בקוד.",
+    body: [
+      "מלחין לא נמצא באולם כשהיצירה מנוגנת. כל מה שיש לו הוא **דף**: סימנים שנגן זר יקרא, בשנה אחרת ובעיר אחרת, ויבין. זו בדיוק המשימה של פרומפט: להעביר כוונה למי שלא היה בחדר.",
+    ],
+    qa: [
+      { q: "מה כתוב בפרטיטורה לפני התו הראשון?", a: "**מפתח**, **משקל** ו**הוראת טמפו**, כמו ~~Allegro~~. הם חלים על כל היצירה, ולא נכתבים שוב בכל תיבה. זו שכבת **ההגדרות**: שפה, טון ומבנה, פעם אחת." },
+      { q: "ומי מנגן?", a: "בצד השורה רשום **ההרכב**: אילו כלים ובאיזה סדר. אותם תווים נשמעים אחרת ברביעיית מיתרים ובתזמורת. זו שכבת **הפרויקט**: למי, איפה ובאיזה הקשר." },
+      { q: "ומה הצ'אט?", a: "**התיבה הנוכחית**: כמה תווים, דינמיקה, אולי סימן הדגשה. היא קצרה, כי כל השאר כבר כתוב. ==תיבה טובה קצרה, כי השכבות שמעליה עושות את העבודה.==" },
+      { q: "ומה עם שקט?", a: "בשנת **1952** בוצעה לראשונה **4′33″** של **ג'ון קייג'** ~~John Cage~~. בפרטיטורה כתובה לכל אחד משלושת הפרקים מילה אחת: **TACET**, \"שותק\". גם זו הוראה מדויקת. בפרומפט: \"בלי הקדמה\", \"אל תמציא מספרי סעיפים\". ==מגבלה היא תו.==" },
+      { q: "ואיך זה נשמע בעיר?", a: "ב**אשדוד** ~~Ashdod~~ פועלת **התזמורת האנדלוסית הישראלית** ~~Israeli Andalusian Orchestra~~. אותה מנגינה בהרכב אחר היא יצירה אחרת. כך גם פרומפט: אותו צ'אט, בפרויקט של גן ילדים באשדוד או של מגדל בתל אביב, מחזיר תשובה אחרת לגמרי." },
+    ],
+    quote: {
+      tr: "\"אין לי מה לומר, ואני אומר את זה, וזו שירה כפי שאני צריך אותה.\"",
+      orig: "\"I have nothing to say and I am saying it and that is poetry as I need it.\"",
+      origDir: "ltr", cite: "ג'ון קייג', Lecture on Nothing, בתוך Silence, Wesleyan University Press, 1961",
+    },
+    after: [
+      "**הכלל המעשי:** כתבו את הפרומפט כמו פרטיטורה. קודם מה שחל על כל היצירה, אחר כך ההרכב, ורק בסוף התיבה של עכשיו, עם שורת \"שותק\" אחת: מה המודל לא עושה.",
+    ],
+    insight: "תיבה קצרה, כי השכבות שמעליה עושות את העבודה.",
+    haiku: ["דף לבן, שקט", "כנר קורא מפתח", "הקשת עולה"],
+    haikuNote: "מה ההייקו מאיר: לפני הצליל, קוראים את מה שחל על הכול.",
+    links: [
+      { to: 1, rule: "הקשר קבוע שייך להגדרות.", insight: "המפתח והטמפו לא נכתבים בכל תיבה.", action: "העבירו להגדרות כל שורה שחוזרת בשתי שאלות שלכם." },
+      { to: 9, rule: "תבנית היא הנחיה עם פרמטרים.", insight: "פרטיטורה מנוגנת אלף פעמים, בכל פעם בהרכב אחר.", action: "כתבו תבנית אחת, והריצו אותה על שני פרויקטים." },
+      { to: 21, rule: "AI טועה בביטחון. אימות עוצר.", insight: "TACET היא הוראה מדויקת של מה לא לעשות.", action: "הוסיפו לכל צ'אט שורת \"אל\": מה המודל לא ממציא." },
+    ],
+    post: `פרטיטורה היא הפרומפט הוותיק בעולם.
+לפני התו הראשון כתובים מפתח וטמפו: חלים על הכול, ולא חוזרים בכל תיבה.
+בצד השורה כתוב ההרכב: אותם תווים, תזמורת אחרת, יצירה אחרת.
+והתיבה עצמה קצרה, כי כל השאר כבר כתוב.
+ג'ון קייג' כתב יצירה שלמה עם הוראה אחת: TACET, שותק. גם מגבלה היא תו.
+מה ה"מפתח והטמפו" שאתם כותבים מחדש בכל שאלה?`,
+    sources: [
+      "John Cage, 4′33″, בכורה: דייוויד טיודור (David Tudor), וודסטוק, ניו יורק, 1952.",
+      "John Cage, \"Lecture on Nothing\", Silence: Lectures and Writings, Wesleyan University Press, 1961.",
+      "התזמורת האנדלוסית הישראלית, אשדוד.",
+      "שיעורים 01, 09 ו-21 בקורס הזה.",
+    ],
+    inspiration: "ג'ון קייג', 1952",
+  },
+  {
+    id: "nature", kind: "ציר זמן", kicker: "ציר זמן · טבע ומבנה", title: "לשאול את הטבע.",
+    deck: "**170** שנה של אדריכלים ששאלו עלה, סבון וטרמיט איך לבנות. היום שואלים מכונה, ואותה שאלה עובדת.",
+    layout: "timeline", layoutName: "ציר זמן: חמש תחנות מ-1851 עד היום", Hero: FogStand,
+    caption: "מהחיפושית לביתן: עיקרון של איסוף טיפות, מתורגם לגג הצללה על חולות החוף. רעיון לתרגיל, לא פרויקט קיים. איור בקוד.",
+    body: [
+      "אדריכלים שואלים את הטבע כבר מאה ושבעים שנה. לא איך הוא **נראה**, אלא איך הוא **פותר**: איך עלה נושא משקל, איך קרום סבון מוצא את השטח הקטן ביותר, איך תלולית מתקררת בלי מזגן.",
+    ],
+    timeline: [
+      { year: "1851", title: "ארמון הבדולח, לונדון", text: "**ג'וזף פקסטון** ~~Joseph Paxton~~ בנה חממה לשושנת המים **ויקטוריה אמזוניקה** ~~Victoria amazonica~~, ולמד מצלעות העלה הענק איך לשאת גג קל. מאותו עיקרון צמח **ארמון הבדולח** ~~Crystal Palace~~.", lesson: 4 },
+      { year: "1972", title: "הפארק האולימפי, מינכן", text: "**פריי אוטו** ~~Frei Otto~~ חקר קרומי סבון ורשתות, ותכנן עם משרד **בניש** ~~Behnisch~~ את גג הרשת של הפארק האולימפי ב**מינכן** ~~Munich~~.", lesson: 6 },
+      { year: "1996", title: "איסטגייט, הרארה", text: "**מיק פירס** ~~Mick Pearce~~ תכנן ב**הרארה** ~~Harare~~ בניין משרדים שמתקרר באוורור טבעי, בהשראת תלוליות טרמיטים.", lesson: 20 },
+      { year: "1997", title: "למילה יש שם", text: "**ג'נין בניוס** ~~Janine Benyus~~ פרסמה את **ביומימיקרי** ~~Biomimicry~~, והציעה לראות בטבע מודל, קנה מידה ומורה." },
+      { year: "היום", title: "פרומפט ביומימטי", text: "במקום \"תכנן הצללה\", שואלים: \"איך אורגניזם בחולות חוף פותר חום, מלח ומחסור במים? חלץ את העיקרון, ותרגם אותו למבנה.\"", lesson: 7 },
+    ],
+    quote: {
+      tr: "\"הטבע כמודל. הטבע כקנה מידה. הטבע כמורה.\"",
+      orig: "\"Nature as model. Nature as measure. Nature as mentor.\"",
+      origDir: "ltr", cite: "ג'נין בניוס, Biomimicry: Innovation Inspired by Nature, William Morrow, 1997",
+    },
+    after: [
+      "**דוגמה מהעיר:** טיילת על חולות החוף ב**אשדוד** ~~Ashdod~~ צריכה צל, ומתמודדת עם שמש, מלח ורוח. **חיפושית מדבר נמיב** ~~Namib Desert beetle~~ אוספת טיפות ערפל על גבשושיות בגבה. שאלה ביומימטית למודל היא: \"מה העיקרון? איך הוא נראה כגג הצללה?\" התשובה היא כיוון לבדיקה, לא פתרון מוכן.",
+      "**הפרומפט בשלוש שכבות:** בהגדרות: \"הבחן בין עיקרון לצורה, וסמן מה צריך אימות מדעי\". בפרויקט: \"ביתן הצללה בטיילת חוף, אשדוד, רוח ים מלוחה\". בצ'אט: \"מפה 3 אורגניזמים שפותרים את אותה בעיה, בטבלה: אורגניזם, עיקרון, תרגום למבנה, מקור\".",
+    ],
+    insight: "השאלה הביומימטית: איך הטבע כבר פותר את זה?",
+    haiku: ["תלולית טרמיט", "רוח עוברת בפנים", "המשרד נושם"],
+    haikuNote: "מה ההייקו מאיר: הפתרון כבר קיים. צריך רק לשאול את מי שפתר.",
+    links: [
+      { to: 4, rule: "החומר מספר את הסיפור יותר מהצורה.", insight: "פקסטון לא העתיק עלה. הוא העתיק את מבנה הצלעות.", action: "בקשו מהמודל את העיקרון, לא את הצורה." },
+      { to: 7, rule: "\"מה אם\" פותחת מה ש\"מה\" סוגרת.", insight: "\"מה אם המבנה היה נושם כמו תלולית?\" היא שאלת \"מה אם\".", action: "הוסיפו לכל שאלה תכנונית גרסה ביומימטית אחת." },
+      { to: 20, rule: "המעגל החלש קובע את איכות המבנה.", insight: "במעגל הסביבתי, הטבע כבר בדק פתרונות.", action: "במעגל החלש, שאלו: איזה אורגניזם חי בתנאים האלה?" },
+    ],
+    post: `ב-1851 ג'וזף פקסטון למד מעלה של שושנת מים איך לשאת גג. ב-1996 מיק פירס למד מטרמיטים איך לקרר משרדים בלי מזגן.
+אדריכלים שואלים את הטבע כבר 170 שנה. לא איך הוא נראה, אלא איך הוא פותר.
+היום אפשר לשאול את אותה שאלה גם מודל AI: "איזה אורגניזם פותר חום, מלח ורוח? חלץ את העיקרון ותרגם אותו למבנה."
+התשובה היא כיוון לבדיקה, לא פתרון מוכן.
+איזו בעיה בפרויקט שלכם הטבע כבר פתר?`,
+    sources: [
+      "Janine M. Benyus, Biomimicry: Innovation Inspired by Nature, William Morrow, 1997.",
+      "Eastgate Centre, Harare, Mick Pearce, 1996.",
+      "Olympiapark München, Behnisch & Partner עם Frei Otto, 1972.",
+      "Joseph Paxton, Crystal Palace, London, 1851.",
+      "שיעורים 04, 06, 07 ו-20 בקורס הזה.",
+    ],
+    inspiration: "ג'נין בניוס, 1997",
+  },
 ];
 
 export const ALL = [
@@ -357,6 +506,8 @@ function ArticleView({ a }: { a: Art }) {
       {a.layout === "strip" && (<><Head a={a} /><figure className="ft-strip" style={{ margin: 0 }}><a.Hero /></figure></>)}
       {a.layout === "collage" && (<><Head a={a} /><figure style={{ margin: 0 }}><a.Hero /></figure></>)}
       {a.layout === "infographic" && (<><Head a={a} /><figure className="ft-info" style={{ margin: 0 }}><a.Hero /></figure></>)}
+      {a.layout === "qa" && (<><Head a={a} /><figure className="ft-strip" style={{ margin: 0 }}><a.Hero /></figure></>)}
+      {a.layout === "timeline" && (<><Head a={a} /><figure className="ft-info" style={{ margin: 0 }}><a.Hero /></figure></>)}
       <figcaption className="ft-caption">{a.caption}</figcaption>
 
       {a.layout === "infographic" && (
@@ -364,6 +515,30 @@ function ArticleView({ a }: { a: Art }) {
       )}
       <div className="ft-col">
         {a.layout !== "infographic" && a.body.map((p, i) => <Rich key={i} as="p" className={i === 0 ? "ft-p ft-drop" : "ft-p"}>{p}</Rich>)}
+        {a.qa && (
+          <section className="ft-qa" aria-label="שאלות ותשובות">
+            {a.qa.map((x, i) => (
+              <div key={i} className="ft-qa-item">
+                <p className="ft-q"><span className="label">שאלה</span>{x.q}</p>
+                <Rich as="p" className="ft-a">{x.a}</Rich>
+              </div>
+            ))}
+          </section>
+        )}
+        {a.timeline && (
+          <ol className="ft-timeline" aria-label="ציר זמן">
+            {a.timeline.map((t, i) => (
+              <li key={i} className="rise" style={{ ["--i" as any]: i }}>
+                <span className="ft-year num">{t.year}</span>
+                <div>
+                  <b>{t.title}</b>
+                  <Rich as="p">{t.text}</Rich>
+                  {t.lesson && <a className="src" href={href("lesson", String(t.lesson))}>בקורס: שיעור {String(t.lesson).padStart(2, "0")}</a>}
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
         <blockquote className="ft-quote">
           <span className="tr-l">תרגום</span>
           <p className="tr">{a.quote.tr}</p>
@@ -415,7 +590,7 @@ function Index() {
     <main className="page">
       <div className="crumbs"><a href={href("home")}>הבית</a><span>/</span><span>כתבות</span></div>
       <div className="kicker">ריכוזי ידע</div>
-      <h1 className="page-title">חמש כתבות, חמישה מקורות.</h1>
+      <h1 className="page-title">שבע כתבות, שבע דרכים לקרוא פרומפט.</h1>
       <p className="page-sub lines">
         <span>כל כתבה מחברת הוגה אחד מהאדריכלות והעיר לשיעורים בקורס.</span>
         <span>בכל אחת: ציטוט מהמקור, <strong>תובנה</strong>, הייקו, חיבורים ופוסט מוכן. כל אחת בפריסה אחרת.</span>

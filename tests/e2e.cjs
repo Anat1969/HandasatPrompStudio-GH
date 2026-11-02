@@ -115,8 +115,8 @@ const AIMENU = fs.readFileSync(path.join(__dirname, '../public/ai-menu.js'));
 
     // כתבות
     await p.goto(BASE + '#/feature', { waitUntil: 'networkidle' });
-    ok(await p.locator('.article-card').count() === 5, 'חמש כתבות באינדקס');
-    for (const id of ['patterns', 'jacobs', 'machine', 'vitruvius', 'minard']) {
+    ok(await p.locator('.article-card').count() === 7, 'שבע כתבות באינדקס');
+    for (const id of ['patterns', 'jacobs', 'machine', 'vitruvius', 'minard', 'score', 'nature']) {
       await p.goto(BASE + '#/feature/' + id, { waitUntil: 'networkidle' });
       const okA = await p.locator('.ft-quote').count() === 1 && await p.locator('.ft-haiku').count() === 1 && await p.locator('.ft-link').count() >= 4;
       ok(okA, `כתבה ${id}: ציטוט, הייקו, חיבורים`);
@@ -130,6 +130,11 @@ const AIMENU = fs.readFileSync(path.join(__dirname, '../public/ai-menu.js'));
     ok((await p.locator('.tone-problem').innerText()).includes('07'), 'מבט כיתה: מזהה את השיעור שנתקעים בו (07)');
     ok((await p.locator('.class-kpis').innerText()).includes('1'), 'מבט כיתה: מי שלא עדכן שבוע');
     ok(!(await p.locator('main').innerText()).includes('רפלקציה על'), 'מבט כיתה: בלי רפלקציות');
+
+    await p.goto(BASE + '#/feature/score', { waitUntil: 'networkidle' });
+    ok(await p.locator('.ft-qa-item').count() === 5, 'כתבת המוזיקה: 5 שאלות ותשובות');
+    await p.goto(BASE + '#/feature/nature', { waitUntil: 'networkidle' });
+    ok(await p.locator('.ft-timeline li').count() === 5, 'כתבת הטבע: 5 תחנות בציר הזמן');
 
     // מצגת לכל שיעור
     for (const n of [7, 19, 30]) {
@@ -195,7 +200,7 @@ const AIMENU = fs.readFileSync(path.join(__dirname, '../public/ai-menu.js'));
 
     for (const vp of [{ width: 390, height: 844 }, { width: 1280, height: 900 }]) {
       await p.setViewportSize(vp);
-      for (const h of ['', '#/lessons', '#/lesson/19', '#/studio', '#/portfolio', '#/feature', '#/feature/vitruvius', '#/feature/jacobs', '#/feature/minard', '#/sync', '#/class?c=kita-test-0000']) {
+      for (const h of ['', '#/lessons', '#/lesson/19', '#/studio', '#/portfolio', '#/feature', '#/feature/vitruvius', '#/feature/jacobs', '#/feature/minard', '#/feature/score', '#/feature/nature', '#/sync', '#/class?c=kita-test-0000']) {
         await p.goto(BASE + h, { waitUntil: 'networkidle' });
         const over = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         ok(over <= 0, `בלי גלילה אופקית ${vp.width} ${h || 'בית'} (${over})`);
