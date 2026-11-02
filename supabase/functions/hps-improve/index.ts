@@ -84,24 +84,32 @@ Deno.serve(async (req) => {
 
   const gem = Deno.env.get("GEMINI_API_KEY")?.trim();
   if (gem) {
-    try {
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${gem}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM }] },
-          contents: [{ role: "user", parts: [{ text: userText }] }],
-          generationConfig: { responseMimeType: "application/json", temperature: 0.3 },
-        }),
-      });
-      if (r.ok) {
-        const d = await r.json();
-        const text = d?.candidates?.[0]?.content?.parts?.map((x: { text?: string }) => x.text ?? "").join("") ?? "";
-        const out = JSON.parse(text);
-        if (typeof out.settings === "string" && typeof out.chat === "string") { log(true); return json({ ...out, provider: "gemini" }); }
-        errors.push("gemini: bad shape");
-      } else errors.push(`gemini ${r.status}`);
-    } catch (e) { errors.push(`gemini: ${String(e).slice(0, 80)}`); }
+    // עומס זמני (503/429) נפוץ במסלול החינמי: מודל חלופי ונסיון חוזר
+    for (const model of ["gemini-flash-latest", "gemini-flash-lite-latest", "gemini-flash-latest"]) {
+      try {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${gem}`, {
+          method: "POST",
+          signal: AbortSignal.timeout(9000),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: SYSTEM }] },
+            contents: [{ role: "user", parts: [{ text: userText }] }],
+            generationConfig: { responseMimeType: "application/json", temperature: 0.3 },
+          }),
+        });
+        if (r.ok) {
+          const d = await r.json();
+          const text = d?.candidates?.[0]?.content?.parts?.map((x: { text?: string }) => x.text ?? "").join("") ?? "";
+          const out = JSON.parse(text);
+          if (typeof out.settings === "string" && typeof out.chat === "string") { log(true); return json({ ...out, provider: "gemini" }); }
+          errors.push(`${model}: bad shape`);
+        } else {
+          errors.push(`${model} ${r.status}`);
+          if (r.status !== 503 && r.status !== 429 && r.status !== 500) break;
+          await new Promise((res) => setTimeout(res, 400));
+        }
+      } catch (e) { errors.push(`${model}: ${String(e).slice(0, 80)}`); }
+    }
   } else errors.push("gemini: no key");
 
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY")?.trim();
