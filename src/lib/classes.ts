@@ -16,7 +16,8 @@ export const addCohort = (code: string, name: string) => {
 export const renameCohort = (code: string, name: string) =>
   save(KEY, cohorts().map((c) => (c.code === code ? { ...c, name } : c)));
 
-const base = () => `${location.origin}${location.pathname}`.replace(/\/app\/index\.html$/, "/app/index.html");
+// קישורים לתלמידים תמיד לכתובת הראשית, גם כשהמרצה פתחה את האפליקציה מקישור הגיבוי
+const base = () => "https://handasat-prompt-studio.vercel.app/";
 export const joinLink = (code: string) => `${base()}#/sync?c=${code}`;
 export const classLink = (code: string) => `${base()}#/class?c=${code}`;
 

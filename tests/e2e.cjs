@@ -133,7 +133,7 @@ const AIMENU = fs.readFileSync(path.join(__dirname, '../public/ai-menu.js'));
     await p.goto(BASE + '#/class', { waitUntil: 'networkidle' });
     await p.waitForFunction(() => location.hash.includes('kita-bpeb7-v2snw'));
     const inv = await p.locator('.invite-text').innerText();
-    ok(inv.includes('#/sync?c=kita-bpeb7-v2snw') && inv.includes('צור קוד וסנכרן'), 'הודעת הצטרפות מוכנה עם קישור והוראה');
+    ok(inv.includes('https://handasat-prompt-studio.vercel.app/#/sync?c=kita-bpeb7-v2snw') && inv.includes('צור קוד וסנכרן'), 'הודעת הצטרפות מוכנה עם קישור והוראה');
     ok((await p.locator('.invite a').getAttribute('href')).startsWith('https://wa.me/?text='), 'כפתור וואטסאפ');
     await p.getByLabel('שם לכיתה חדשה').fill('מחזור ב');
     await p.getByRole('button', { name: 'פתח כיתה חדשה' }).click();
